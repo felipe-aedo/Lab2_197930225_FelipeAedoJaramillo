@@ -1,6 +1,6 @@
 % Cargar los archivos
 
-:- use_module([tda_jugador, tda_propiedad]).
+:- use_module([tda_jugador, tda_propiedad, tda_tablero, tda_carta, tda_juego]).
 
 % --- TESTING ---
 

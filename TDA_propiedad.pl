@@ -15,7 +15,7 @@
 
 :- use_module(operadores_aux).
 
-%----CONSTRUCTOR----
+%-----CONSTRUCTOR-----
 % Descripcion: Constructor TDA propiedad
 % Dominio: Dominio: ID (integer) X Nombre (atom) X Precio (integer) X Renta (integer) X Dueno (integer) X Casas (integer) X EsHotel (boolean) X EstaHipotecada (boolean)
 %          X Propiedad (TDA propiedad)
@@ -81,11 +81,11 @@ propiedadEstaHipotecada(Propiedad):-
 % Recorrido: propiedad
 propiedadSetDueno(Propiedad, Dueno, PropiedadActualizada):-
     Propiedad = [ID, Nombre, Precio, Renta, _, Casas, EsHotel, EstaHipotecada],
-    PropiedadActualizada = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstaHipotecada].
+    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstaHipotecada, PropiedadActualizada).
 
 % Descripcion: Cambia el estado a hipotecada
 % Dominio: PropiedadIN (TDA propiedad) X PropiedadOut (TDA propiedad)
 % Recorrido: boolean
 propiedadHipotecar(PropiedadIN, PropiedadOut):-
     Propiedad = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstadoHipoteca], EstadoHipoteca \= true,
-    PropiedadOut = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, true].
+    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, true, PropiedadOut).

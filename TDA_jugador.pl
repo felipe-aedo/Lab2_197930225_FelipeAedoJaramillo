@@ -21,7 +21,7 @@
 
 :- use_module([operadores_aux, tda_propiedad]). %Importar libreria de operadores
 
-%----CONSTRUCTOR----
+%-----CONSTRUCTOR-----
 % Descripcion: Constructor TDA jugador (formato lista)
 % Dominio: ID (int) X Nombre (string) X Dinero (int) X Propiedades (list id's) X PosicionActual (int) X 
 %          EstaEnCarcel (boolean) X CartasCarcel (int) X Jugador (TDA jugador)
@@ -91,35 +91,35 @@ jugadorObtenerCartasCarcel(Jugador, CartasCarcel):-
 % Recorrido: jugador
 jugadorSetDinero(Jugador, NuevoDinero, JugadorActualizado):-
     Jugador = [ID, Nombre, _, Propiedades, Posicion, EstaenCarcel, CartasCarcel],
-    JugadorActualizado = [ID, Nombre, NuevoDinero, Propiedades, Posicion, EstaenCarcel, CartasCarcel].
+    jugador(ID, Nombre, NuevoDinero, Propiedades, Posicion, EstaenCarcel, CartasCarcel, JugadorActualizado).
 
 % Descripcion: Agrega una propiedad a la lista de propiedades del jugador
 % Dominio: Jugador (TDA jugador) X NuevaPropiedad (TDA propiedad) X JugadorActualizado (TDA jugador)
 % Recorrido: jugador
 jugadorAgregarPropiedad(Jugador, NuevaPropiedad, JugadorActualizado):-
     Jugador = [ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, CartasCarcel],
-    JugadorActualizado = [ID, Nombre, Dinero, [NuevaPropiedad|Propiedades], Posicion, EstaenCarcel, CartasCarcel].
+    jugador(ID, Nombre, Dinero, [NuevaPropiedad|Propiedades], Posicion, EstaenCarcel, CartasCarcel, JugadorActualizado).
 
 % Descripcion: Modifica la posicion del jugador
 % Dominio: Jugador (TDA jugador) X NuevaPosicion (integer) X JugadorActualizado (TDA jugador)
 % Recorrido: jugador
 jugadorSetPosicion(Jugador, NuevaPosicion, JugadorActualizado):-
     Jugador = [ID, Nombre, Dinero, Propiedades, _, EstaenCarcel, CartasCarcel],
-    JugadorActualizado = [ID, Nombre, Dinero, Propiedades, NuevaPosicion, EstaenCarcel, CartasCarcel].
+    jugador(ID, Nombre, Dinero, Propiedades, NuevaPosicion, EstaenCarcel, CartasCarcel, JugadorActualizado).
 
 % Descripcion: Modifica el estado de encarcelamiento 
 % Dominio: Jugador (TDA jugador) X EstadoCarcel (boolean) X JugadorActualizado (TDA jugador)
 % Recorrido: jugador
 jugadorSetEstaenCarcel(Jugador, EstadoCarcel, JugadorActualizado):-
     Jugador = [ID, Nombre, Dinero, Propiedades, Posicion, _, CartasCarcel],
-    JugadorActualizado = [ID, Nombre, Dinero, Propiedades, Posicion, EstadoCarcel, CartasCarcel].
+    jugador(ID, Nombre, Dinero, Propiedades, Posicion, EstadoCarcel, CartasCarcel, JugadorActualizado).
 
 % Descripcion: Modifica la cantidad de cartas para ser desencarcelado
 % Dominio: Jugador (TDA jugador) X NuevasCartasCarcel (integer) X JugadorActualizado (TDA jugador)
 % Recorrido: jugador
 jugadorSetCartasCarcel(Jugador, NuevasCartasCarcel, JugadorActualizado):-
     Jugador = [ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, _],
-    JugadorActualizado = [ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, NuevasCartasCarcel].
+    jugador(ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, NuevasCartasCarcel, JugadorActualizado).
 
 % Descripcion: Compra propiedad verificando que alcance el dinero y la propiedad no tenga propietario
 % Dominio: Jugador (TDA jugador) X Propiedad (TDA propiedad) X JugadorActualizado (TDA jugador)

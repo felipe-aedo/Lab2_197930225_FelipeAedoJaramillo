@@ -16,7 +16,8 @@
     jugadorSetEstaenCarcel/3,
     jugadorSetCartasCarcel/3,
     jugadorComprarPropiedad/3,
-    jugadorPagarRenta/5
+    jugadorPagarRenta/5,
+    jugadorCorregirPosicion/3
     ]).
 
 :- use_module([operadores_aux, tda_propiedad]). %Importar libreria de operadores
@@ -121,6 +122,19 @@ jugadorSetCartasCarcel(Jugador, NuevasCartasCarcel, JugadorActualizado):-
     Jugador = [ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, _],
     jugador(ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, NuevasCartasCarcel, JugadorActualizado).
 
+% Descripcion: Corrige la posicion de un jugador si se sale del tablero
+% Dominio: Jugador (TDA jugador) X UltimaPosicion (integer) X JugadorActualizado (TDA jugador)
+% Recorrido: jugador
+jugadorCorregirPosicion(Jugador, UltimaPosicion, JugadorActualizado):-
+    jugadorObtenerPosicion(Jugador, Posicion),
+    Posicion > UltimaPosicion, 
+    Correccion is Posicion - UltimaPosicion - 1,
+    jugadorSetPosicion(Jugador, Correccion, JugadorActualizado).
+%Caso en el que no hace falta corregir :
+jugadorCorregirPosicion(Jugador, UltimaPosicion, Jugador):- 
+    jugadorObtenerPosicion(Jugador, Posicion),
+    Posicion =< UltimaPosicion.
+
 % Descripcion: Compra propiedad verificando que alcance el dinero y la propiedad no tenga propietario
 % Dominio: Jugador (TDA jugador) X Propiedad (TDA propiedad) X JugadorActualizado (TDA jugador)
 % Recorrido: jugador
@@ -128,6 +142,9 @@ jugadorComprarPropiedad(Jugador, Propiedad, JugadorActualizado):-
     jugadorObtenerDinero(Jugador, Dinero), propiedadObtenerPrecio(Propiedad, Precio), Dinero >= Precio,
     propiedadObtenerDueno(Propiedad, Dueno), Dueno = [], DineroAct is Dinero - Precio, propiedadObtenerId(Propiedad, ID),
     jugadorSetDinero(Jugador, DineroAct, JugadorPaga), jugadorAgregarPropiedad(JugadorPaga, ID, JugadorActualizado).
+jugadorComprarPropiedad(Jugador, Propiedad, Jugador):- %retorna sin cambios si no pudo comprar
+    jugadorObtenerDinero(Jugador, Dinero), propiedadObtenerPrecio(Propiedad, Precio), propiedadObtenerDueno(Propiedad, Dueno),
+    (Dueno \= [] ; Dinero < Precio).
 
 % Descripcion: Transfiere dinero de un jugador a otro 
 % Dominio: JugadorPagadorIN (TDA jugador) X JugadorReceptorIN (TDA jugador) X Monto (integer) X JugadorPagadorOUT (TDA jugador) X JugadorReceptorOUT (TDA jugador)

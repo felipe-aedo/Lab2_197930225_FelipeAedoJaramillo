@@ -18,26 +18,26 @@ tablero(Propiedades, CartasSuerte, CartasComunidad, CasillasEspeciales, Tablero)
 
 %-----GETTERS-----
 % Descripcion: Obtiene las propiedades con su posicion (lista de pares)
-% Dominio:
-% Recorrido:
+% Dominio: Tablero (TDA tablero) X Propiedades (lista de pares)
+% Recorrido: lista de pares
 tableroGetPropiedades(Tablero, Propiedades):-
     Tablero = [Propiedades, _, _, _].
 
 % Descripcion: Obtiene las casillas especiales con su posicion (lista de pares)
-% Dominio:
-% Recorrido:
+% Dominio: Tablero (TDA tablero) X Casillas (lista de pares)
+% Recorrido: lista de pares
 tableroGetCasillas(Tablero, Casillas):-
     Tablero = [_, _, _, Casillas].
 
 % Descripcion: Obtiene la ultima posicion en el tablero.
-% Dominio:
-% Recorrido:
+% Dominio: Tablero (TDA tablero) X Posicion (integer)
+% Recorrido: integer
 tableroObtenerUltimaPosicion(Tablero, Posicion):-
     tableroGetPropiedades(Tablero, Propiedades), tableroGetCasillas(Tablero, Casillas),
     ultimaPosicion(Propiedades, Casillas, Posicion).
 
 
-% Descripcion: Encuentra la ultima posicion en el tablero
+% Descripcion: Encuentra la ultima posicion en un par de listas de pares
 % Dominio: Propiedades (lista de pares) X Casillas (lista de pares) X UltimaPosicion (integer)
 % Recorrido: integer
 % Recursion de cola

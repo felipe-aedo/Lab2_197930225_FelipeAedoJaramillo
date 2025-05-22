@@ -86,6 +86,6 @@ propiedadSetDueno(Propiedad, Dueno, PropiedadActualizada):-
 % Descripcion: Cambia el estado a hipotecada
 % Dominio: PropiedadIN (TDA propiedad) X PropiedadOut (TDA propiedad)
 % Recorrido: boolean
-propiedadHipotecar(PropiedadIN, PropiedadOut):-
+propiedadHipotecar(Propiedad, PropiedadActualizada):-
     Propiedad = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstadoHipoteca], EstadoHipoteca \= true,
-    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, true, PropiedadOut).
+    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, true, PropiedadActualizada).

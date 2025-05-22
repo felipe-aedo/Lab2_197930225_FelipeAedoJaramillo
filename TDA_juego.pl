@@ -8,7 +8,9 @@
     juegoObtenerDineroBanco/2,
     juegoObtenerNumeroDados/2,
     juegoObtenerTurnoActual/2,
-    juegoAgregarJugador/3
+    juegoAgregarJugador/3,
+    juegoObtenerJugadorActual/2,
+    juegoLanzarDados/4
     ]).
 
 :- use_module([tda_jugador, tda_propiedad, tda_tablero, tda_carta, operadores_aux]).
@@ -83,6 +85,17 @@ juegoObtenerMaximoCasas(Juego, MaximoCasas):-
 juegoObtenerMaximoHoteles(Juego, MaximoHoteles):-
     Juego = [_, _, _, _, _, _, _, MaximoHoteles].
 
+% Descripcion: Obtiene el jugador de turno
+% Dominio: Juego (TDA juego) X Jugador(TDA jugador)
+% Recorrido: jugador
+% Recursion natural
+juegoObtenerJugadorActual(Juego, JugadorActual):- %EL PRIMERO ES EL JUGADOR DE TURNO.
+    juegoObtenerJugadores(Juego, Jugadores), juegoObtenerTurnoActual(Juego, Turno), Jugadores = [JugadorActual|_],
+    jugadorObtenerId(JugadorActual, ID), ID = Turno, !.
+juegoObtenerJugadorActual(Juego, JugadorActual):- %LLAMADA RECURSIVA.
+    juegoQuitarJugador(Juego, JuegoAct), juegoObtenerJugadorActual(JuegoAct, JugadorActual).
+
+%-----SETTERS Y MODIFIERS
 % Descripcion: Agrega jugador al juego asigandole dinero del banco.
 % Dominio: Juego (TDA juego) X Jugador (TDA jugador) X JuegoActualizado (TDA juego).
 % Recorrido: juego
@@ -90,4 +103,40 @@ juegoAgregarJugador(Juego, Jugador, JuegoActualizado):-
     Juego = [_, Tablero, DineroBancoActual, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles],
     juegoObtenerJugadores(Juego, JugadoresActuales),
     DineroBancoActual >= 1500 , DineroBancoActualizado is DineroBancoActual - 1500,
-    jugador([Jugador|JugadoresActuales], Tablero, DineroBancoActualizado, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles, JuegoActualizado).
+    juego([Jugador|JugadoresActuales], Tablero, DineroBancoActualizado, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles, JuegoActualizado).
+
+
+% Descripcion: Quita el primer jugador de la lista de jugadores del juego (util para iterar jugadores recursivamente).
+% Dominio: Juego (TDA juego) X JuegoActualizado (TDA juego).
+% Recorrido: juego
+juegoQuitarJugador(Juego, JuegoActualizado):-
+    Juego = [[_|RestoJugadores], Tablero, DineroBanco, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles],
+    JuegoActualizado = [RestoJugadores, Tablero, DineroBanco, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles].
+
+
+% Descripcion: Juega la cantidad de dados indicadas en el TDA juego.
+% Dominio: Juego (TDA juego) X Seeds (lista de integer) X NuevasSeeds (lista de integer) X Resultados (lista de integer)
+% Recorrido: lista de seeds restantes X lista de dados.
+% Recursión de cola
+juegoLanzarDados(Juego, SeedDados, NSeedDados, ResultadoDados):-
+    juegoObtenerNumeroDados(Juego, NDados),
+    lanzar_dados(SeedDados, NDados, NSeedDados, ResultadoDados).
+
+%Predicado auxiliar para iterar cada cado a generar
+% Caso base: sin dados
+lanzar_dados([], 0, [], []).
+% Caso recursivo: usar una seed, repetir
+lanzar_dados([Seed | RestoSeeds], N, [NvaSeed | NuevasSeeds], [R | Resultados]):-
+    N > 0,
+    getDadoRandom(Seed, NvaSeed, R),
+    N1 is N - 1,
+    lanzar_dados(RestoSeeds, N1, NuevasSeeds, Resultados).
+
+% Predicado myRandom
+myRandom(Xn, Xn1):-
+  Xn1 is ((1103515245 * Xn) + 12345) mod 2147483648.
+
+% Predicado getDadoRandom que recibe la semilla y controla los resultados
+getDadoRandom(Seed, NvaSeed, R):-
+    myRandom(Seed, NvaSeed),
+    R is 1 + (NvaSeed mod 6).

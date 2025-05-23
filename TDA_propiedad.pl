@@ -10,7 +10,9 @@
     propiedadObtenerCasas/2,
     propiedadEsHotel/1,
     propiedadEstaHipotecada/1,
-    propiedadSetDueno/3
+    propiedadSetDueno/3,
+    propiedadSetCasas/3,
+    propiedadSetHotel/3
     ]).
 
 :- use_module(operadores_aux).
@@ -82,6 +84,20 @@ propiedadEstaHipotecada(Propiedad):-
 propiedadSetDueno(Propiedad, Dueno, PropiedadActualizada):-
     Propiedad = [ID, Nombre, Precio, Renta, _, Casas, EsHotel, EstaHipotecada],
     propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstaHipotecada, PropiedadActualizada).
+
+% Descripcion: Actualiza cantidad de casas en una propiedad
+% Dominio: Propiedad (TDA propiedad) X Casas (integer) X PropiedadActualizada (TDA propiedad)
+% Recorrido: propiedad
+propiedadSetCasas(Propiedad, Casas, PropiedadActualizada):-
+    Propiedad = [ID, Nombre, Precio, Renta, Dueno, _, EsHotel, EstaHipotecada],
+    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstaHipotecada, PropiedadActualizada).
+
+% Descripcion: Cambia el estado de hotel de la propiedad
+% Dominio: Propiedad (TDA propiedad) X Estado (boolean) X PropiedadActualizada (TDA propiedad)
+% Recorrido: propiedad
+propiedadSetHotel(Propiedad, Estado, PropiedadActualizada):-
+    Propiedad = [ID, Nombre, Precio, Renta, Dueno, Casas, _, EstaHipotecada],
+    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, Estado, EstaHipotecada, PropiedadActualizada).
 
 % Descripcion: Cambia el estado a hipotecada
 % Dominio: PropiedadIN (TDA propiedad) X PropiedadOut (TDA propiedad)

@@ -8,11 +8,16 @@
     juegoObtenerDineroBanco/2,
     juegoObtenerNumeroDados/2,
     juegoObtenerTurnoActual/2,
+    juegoObtenerJugadorActual/2,
+    juegoObtenerPosicion/3,
     juegoAgregarJugador/3,
     juegoAgregarTablero/3,
-    juegoObtenerJugadorActual/2,
+    juegoActualizarJugadores/3,
+    juegoActualizarPropiedad/3,
     juegoLanzarDados/4,
-    juegoMoverJugador/4
+    juegoMoverJugador/4,
+    juegoConstruirCasa/3,
+    juegoCalcularRentaPropiedad/3
     ]).
 
 :- use_module([tda_jugador, tda_propiedad, tda_tablero, tda_carta, operadores_aux]).
@@ -110,6 +115,13 @@ juegoObtenerUltimaPosicion(Juego, UltimaPosicion):-
     juegoObtenerTablero(Juego, Tablero),
     tableroObtenerUltimaPosicion(Tablero, UltimaPosicion).
 
+% Descripcion: Obtiene el elemento en la posicion especificada (propiedad o casilla especial)
+% Dominio : Tablero (TDA Juego) X Posicion (integer) X Elemento (Propiedad o casillaEspecial)
+% Recorrido : casilla o propiedad
+juegoObtenerPosicion(Juego, Posicion, Elemento):-
+    juegoObtenerTablero(Juego, Tablero),
+    tableroObtenerPosicion(Tablero, Posicion, Elemento).
+
 %-----SETTERS Y MODIFIERS
 % Descripcion: Agrega jugador al juego asigandole dinero del banco.
 % Dominio: Juego (TDA juego) X Jugador (TDA jugador) X JuegoActualizado (TDA juego).
@@ -146,6 +158,7 @@ juegoActualizarJugador(Juego, Jugador, JuegoActualizado):-
 % Descripcion: Actualiza un jugador en una lista de jugadores
 % Dominio: lista de jugadores X jugador X lista actualizada
 % Recorrido: lista de jugadores
+% Recursion natural
 actualizarJugador([], _, []).
 actualizarJugador([JActual | Resto], JNuevo, [JNuevo | Resto]) :-
     jugadorObtenerId(JActual, Id1),
@@ -153,14 +166,86 @@ actualizarJugador([JActual | Resto], JNuevo, [JNuevo | Resto]) :-
     Id1 =:= Id2, !.
 actualizarJugador([JActual | Resto], JNuevo, [JActual | RestoActualizado]) :-
     actualizarJugador(Resto, JNuevo, RestoActualizado).
-  
+
+% Descripcion: Actualiza una propiedad en el juego
+% Dom: Juego (TDA juego) X Propiedad (TDA propiedad) X JuegoActualizado (TDA juego)
+% Rec: juego
+juegoActualizarPropiedad(Juego, Propiedad, JuegoActualizado):-
+    juegoObtenerTablero(Juego, Tablero),
+    tableroActualizarPropiedad(Tablero, Propiedad, TableroActualizado),
+    juegoAgregarTablero(Juego, TableroActualizado, JuegoActualizado).
 
 % Descripcion: Agrega tablero al juego.
 % Dominio: Juego (TDA juego) X Tablero (TDA tablero) X JuegoActualizado (TDA juego).
 % Recorrido: juego
 juegoAgregarTablero(Juego, Tablero, JuegoActualizado):-
     Juego = [Jugadores, _, DineroBanco, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles],
-    JuegoActualizado = [Jugadores, Tablero, DineroBanco, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles].
+    juego(Jugadores, Tablero, DineroBanco, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles, JuegoActualizado).
+
+% Descripcion: Actualiza el dinero en el banco.
+% Dominio: Juego (TDA juego) X Dinero (integer) X JuegoActualizado (TDA juego).
+% Recorrido: juego
+juegoSetDineroBanco(Juego, Dinero, JuegoActualizado):-
+    Juego = [Jugadores, Tablero, _, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles],
+    juego(Jugadores, Tablero, Dinero, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles, JuegoActualizado).
+
+% Descripcion: Actualiza una propiedad en el juego construyendo una casa en ella
+% Dom: Juego (TDA juego) X Propiedad (TDA propiedad) X JuegoActualizado (TDA juego)
+% Rec: juego
+juegoConstruirCasa(Juego, Propiedad, JuegoActualizado):-
+    juegoObtenerMaximoCasas(Juego, MaximoCasas),
+    propiedadObtenerCasas(Propiedad, Casas),
+    Casas < MaximoCasas, NCasas is Casas + 1,
+    propiedadSetCasas(Propiedad, NCasas, PropiedadActualizada),
+    juegoActualizarPropiedad(Juego, PropiedadActualizada, JuegoActualizado).
+juegoConstruirCasa(Juego, Propiedad, Juego):- %no es posible construir
+    juegoObtenerMaximoCasas(Juego, MaximoCasas),
+    propiedadObtenerCasas(Propiedad, Casas),
+    Casas = MaximoCasas.
+
+% Descripcion: Actualiza una propiedad en el juego construyendo un hotel
+% Dom: Juego (TDA juego) X Propiedad (TDA propiedad) X JuegoActualizado (TDA juego)
+% Rec: juego
+juegoConstruirHotel(Juego, Propiedad, JuegoActualizado):-
+    juegoObtenerMaximoCasas(Juego, MaximoCasas),
+    propiedadObtenerCasas(Propiedad, Casas),
+    Casas = MaximoCasas,
+    \+ propiedadEsHotel(Propiedad),
+    propiedadSetHotel(Propiedad, true, PropiedadConHotel),
+    propiedadSetCasas(PropiedadConHotel, 0, PropiedadActualizada),
+    juegoActualizarPropiedad(Juego, PropiedadActualizada, JuegoActualizado).
+juegoConstruirHotel(Juego, Propiedad, Juego):- %no es posible construir
+    juegoObtenerMaximoCasas(Juego, MaximoCasas),
+    propiedadObtenerCasas(Propiedad, Casas),
+    (Casas \= MaximoCasas ; propiedadEsHotel(Propiedad)).
+
+% Descripcion: Calcula la renta de una propiedad
+% Dominio: Juego (TDA juego) X propiedad (TDA propiedad) X Monto (number)
+% Recorrido : integer
+juegoCalcularRentaPropiedad(_, Propiedad, Monto):-% Caso : No es hotel
+    \+ propiedadEsHotel(Propiedad),
+    propiedadObtenerCasas(Propiedad, CantidadCasas),
+    propiedadObtenerRenta(Propiedad, RentaBase),
+    RentaCasas is RentaBase* 0.2 * CantidadCasas,
+    Monto is RentaCasas + RentaBase.
+juegoCalcularRentaPropiedad(Juego, Propiedad, Monto):- %Caso : Es Hotel
+    propiedadEsHotel(Propiedad),
+    juegoObtenerMaximoCasas(Juego, MaximoCasas),
+    propiedadObtenerRenta(Propiedad, RentaBase),
+    MontoParcial is RentaBase * 0.2 * MaximoCasas,
+    Monto is MontoParcial + RentaBase.
+
+% Descripcion: Cobra dinero a un jugador para ser guardado en el banco.
+% Dominio: Juego (TDA juego) X Jugador (TDA jugador) X Monto (integer) X JuegoActualizado (TDA juego).
+% Recorrido: juego
+juegoCobrarJugador(Juego, Jugador, Monto, JuegoActualizado):-
+    juegoObtenerDineroBanco(Juego, DineroBanco),
+    jugadorObtenerDinero(Jugador, DineroJugador),
+    DineroJugador >= Monto, DineroJugadorActualizado = DineroJugador - Monto,
+    DineroBancoActualizado = DineroBanco + Monto,
+    juegoSetDineroBanco(Juego, DineroBancoActualizado, JuegoBancoActualizado),
+    jugadorSetDinero(Jugador, DineroJugadorActualizado, JugadorActualizado),
+    juegoActualizarJugador(JuegoBancoActualizado, JugadorActualizado, JuegoActualizado).
 
 % Descripcion: Mueve al jugador en el tablero actualizando el juego.
 % Dominio: Juego (TDA juego) X ID (integer) X Dados (lista integer) X JuegoActualizado (TDA juego)
@@ -171,7 +256,7 @@ juegoMoverJugador(Juego, ID, Dados, JuegoActualizado):-
     jugadorObtenerPosicion(Jugador, Posicion),
     sumarLista(Dados, Movimiento),
     PosicionActualizada is Posicion + Movimiento,
-    jugadorSetPosicion(Jugador, PosicionActualizada, JugadorPre),
+    jugadorSetPosicion(Jugador, PosicionActualizada, JugadorPre), %Necesario cobrar impuesto antes de corregir posicion
     jugadorCorregirPosicion(JugadorPre, UltimaPosicion, JugadorActualizado),
     juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).
 
@@ -193,11 +278,24 @@ lanzar_dados([Seed | RestoSeeds], N, [NvaSeed | NuevasSeeds], [R | Resultados]):
     N1 is N - 1,
     lanzar_dados(RestoSeeds, N1, NuevasSeeds, Resultados).
 
-% Predicado myRandom
-myRandom(Xn, Xn1):-
-  Xn1 is ((1103515245 * Xn) + 12345) mod 2147483648.
+% Descripcion: Ejecuta la accion de una carta en un juego.
+% Dominio: Juego (TDA juego) X Carta (TDA carta) X JuegoActualizado (TDA juego)
+% Recorrido : juego
+juegoEjecutarCarta(Juego, Carta, JuegoActualizado):-
+    cartaObtenerAccion(Carta, Accion),
+    call(Accion, Juego, JuegoActualizado).
 
-% Predicado getDadoRandom que recibe la semilla y controla los resultados
-getDadoRandom(Seed, NvaSeed, R):-
-    myRandom(Seed, NvaSeed),
-    R is 1 + (NvaSeed mod 6).
+% ------Acciones de cartas--------
+% Dominio: Juego (TDA juego) X Jugador (TDA cjugador) X JuegoActualizado (TDA juego)
+% Recorrido : juego
+irASalida(Juego, Jugador, JuegoActualizado):-
+    jugadorSetPosicion(Jugador, 0 , JugadorActualizado),
+    juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).
+
+% Dominio: Juego (TDA juego) X Jugador (TDA jugador) X JuegoActualizado (TDA juego)
+% Recorrido : juego
+ganarKino(Juego, Jugador, JuegoActualizado):-
+    jugadorObtenerDinero(Jugador, Dinero),
+    DineroActualizado is Dinero + 20000,
+    jugadorSetDinero(Jugador, DineroActualizado, JugadorActualizado),
+    juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).

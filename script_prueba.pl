@@ -37,17 +37,25 @@ prueba :-
     write('Propiedad 5 creada: '), writeln(Propiedad5),
     (esPropiedad(Propiedad5) -> writeln('Es una propiedad valida.') ; writeln('No es una propiedad valida')),
 
+    % Crear cartas
+    carta( 1, suerte, 'Avance hasta la casilla de salida', irASalida, C1),
+    carta( 2, suerte, 'Ha sido encarcelado', irACarcel, C2),
+    carta( 3, suerte, 'Gana 20.000', ganarKino, C3),
+    carta( 4, comunidad, 'Cambia el impuesto del juego', cambiarImpuesto, C4),
+    carta( 5, comunidad, 'recibe 100 de cada jugador', cumpleanos, C5),
+
     % Crear tablero
     tablero([] ,[], [], [], T1),
     write('Tablero vacio: '), writeln(T1),
 
     % Agregar componentes al tablero
-    tableroAgregarPropiedades(T1, [[Propiedad1, 1], [Propiedad2, 2], [Propiedad3, 3], [Propiedad4, 4], [Propiedad5, 6]], T2),
-    tableroAgregarCasillasEspeciales(T2, [[salida, 0],[carcel, 5]], T3),
-    write('Tablero con propiedades y casillas especiales: '), writeln(T3),
+    tableroAgregarPropiedades(T1, [[Propiedad1, 1], [Propiedad2, 2], [Propiedad3, 4], [Propiedad4, 6], [Propiedad5, 8]], T2),
+    tableroAgregarCasillasEspeciales(T2, [[salida, 0],[suerte, 3],[carcel, 5], [comunidad, 7]], T3),
+    tableroAgregarCartas(T3, [C1,C2,C3], [C4,C5], T4),
+    write('Tablero con todos los componentes: \n'), writeln(T4),
 
     % comprobar la ultima posicion en el tablero
-    tableroObtenerUltimaPosicion(T3, UltimaPos),
+    tableroObtenerUltimaPosicion(T4, UltimaPos),
     write('Ultima posicion en el tablero: '), writeln(UltimaPos), 
 
     %intentar crear un juego
@@ -61,7 +69,7 @@ prueba :-
     juegoAgregarJugador(G1, J2, G2),
 
     %Agregar tablero
-    juegoAgregarTablero(G2, T3, G3),
+    juegoAgregarTablero(G2, T4, G3),
     write('Jugadores y tablero agregados: '), writeln(G3),
 
     %Obtener jugador de turno
@@ -69,7 +77,7 @@ prueba :-
     write('Jugador turno actual: '), writeln(JugadorActual),
 
     %probar lanzar dados
-    juegoLanzarDados(G3, [5, 4], _, Dados),
+    juegoLanzarDados(G3, [3, 4], _, Dados),
     write('Dados lanzados: '), writeln(Dados),
 
     %intentar mover jugador
@@ -89,15 +97,37 @@ prueba :-
     (esJugador(J2_1) -> writeln('Es un jugador valido.') ; writeln('No es un jugador valido')),
     (esPropiedad(Propiedad2_1) -> writeln('Es una propiedad valida.') ; writeln('No es una propiedad valida')),
 
+    % actualizar propiedad con dueño
+    juegoActualizarPropiedad(G4, Propiedad2_1, G5),
+
     % intentar pagar renta (No le alcanza, paga todo lo q tiene)
     writeln('Intentar pagar renta de 500...(J2 paga a J1)'),
     jugadorPagarRenta(J2_1, J1_0, 500, J2_2, J1_1),
     write('Jugadores actualizados: '), write(J2_2), write(" | "), writeln(J1_1),
 
     % intentar pagar renta (Pagar normalmente)
-    writeln('Intentar pagar renta de 700...(J1 paga a J2)'),
-    jugadorPagarRenta(J1_1, J2_2, 700, J1_2, J2_3),
-    write('Jugadores actualizados: '), write(J1_2), write(" | "), writeln(J2_3).
+    writeln('Intentar pagar renta de 1300...(J1 paga a J2)'),
+    jugadorPagarRenta(J1_1, J2_2, 1300, J1_2, J2_3),
+    write('Jugadores actualizados: '), write(J1_2), write(" | "), writeln(J2_3),
+
+    % actualizar jugadores tras compra de propiedad y prueba de pago de rentas
+    juegoActualizarJugadores(G5, [J1_2, J2_3], G6),
+    
+    % Obtener posicion (propiedad despues de ser comprada)
+    jugadorObtenerPosicion(J2_3, Pos2),
+    juegoObtenerPosicion(G6, Pos2, Prop2_2),
+
+    % construir casa
+    juegoConstruirCasa(G6, Prop2_2, G7),
+    write('Casa construida: '), writeln(G7),
+
+    % propiedad con casa construida
+    juegoObtenerPosicion(G7, Pos2, Prop2_3),
+
+    % renta con una casa
+    juegoCalcularRentaPropiedad(G7, Prop2_3, Renta),
+    write('Renta propiedad 2 : '), writeln(Renta).
+
 
 
 :- initialization(prueba).

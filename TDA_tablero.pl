@@ -6,7 +6,10 @@
     tableroAgregarCasillasEspeciales/3,
     tableroAgregarCartas/4,
     tableroObtenerPosicion/3,
+    tableroObtenerPropiedad/3,
+    tableroObtenerCartas/3,
     tableroObtenerUltimaPosicion/2,
+    tableroObtenerCarcel/2,
     tableroActualizarPropiedad/3
     ]).
 
@@ -25,6 +28,29 @@ tablero(Propiedades, CartasSuerte, CartasComunidad, CasillasEspeciales, Tablero)
 % Recorrido: lista de pares
 tableroObtenerPropiedades(Tablero, Propiedades):-
     Tablero = [Propiedades, _, _, _].
+
+% Descripcion: Obtiene la propiedad de id especifico
+% Dominio: Tablero (TDA tablero) X Id (integer) X Propiedad (TDA propiedad)
+% Recorrido: propiedad
+tableroObtenerPropiedad(Tablero, Id, Propiedad):-
+    tableroObtenerPropiedades(Tablero, Propiedades),
+    encontrarPropiedad(Propiedades, Id, Propiedad).
+% predicado auxiliar 
+% Recursion de cola
+encontrarPropiedad([[Propiedad,_]|_], Id, Propiedad) :- 
+    propiedadObtenerId(Propiedad, Id2), Id = Id2, !.
+encontrarPropiedad([_|RestoProps], Id, Propiedad):-
+    encontrarPropiedad(RestoProps, Id, Propiedad).
+
+% Descripcion: Obtiene las cartas de un tipo especificado
+% Dominio: Tablero (TDA tablero) X TipoCarta (Atom) X Cartas (Lista de cartas)
+% Recorrido: lista de cartas
+tableroObtenerCartas(Tablero, TipoCarta, Cartas):-
+    Tablero = [_, Cartas, _, _],
+    TipoCarta = suerte.
+tableroObtenerCartas(Tablero, TipoCarta, Cartas):-
+    Tablero = [_, _, Cartas, _],
+    TipoCarta = comunidad.
 
 % Descripcion: Obtiene las casillas especiales con su posicion (lista de pares)
 % Dominio: Tablero (TDA tablero) X Casillas (lista de pares)
@@ -45,7 +71,7 @@ tableroObtenerPosicion(Tablero, Posicion, Elemento):-
 % Recorrido: propiedad o casilla
 %Recursion Natural
 encontrarPosicion([],[], _, []) :- !.
-encontrarPosicion([[Prop, PosProp]|_], _, Posicion, Prop):- Posicion = PosProp, !.
+encontrarPosicion([[Propiedad, PosProp]|_], _, Posicion, Propiedad):- Posicion = PosProp, !.
 encontrarPosicion(_, [[Casilla, PosCasilla]|_], Posicion, Casilla):- Posicion = PosCasilla, !.
 encontrarPosicion([_|RestoProps], [_|RestoCasillas], Posicion, Elemento):-
     encontrarPosicion(RestoProps, RestoCasillas, Posicion, Elemento).
@@ -63,20 +89,30 @@ tableroObtenerUltimaPosicion(Tablero, Posicion):-
 % Recursion de cola
 ultimaPosicion(Propiedades, Casillas, UltimaPosicion):-
     ultimaPosicionAux(Propiedades, Casillas, 0, UltimaPosicion).
-
 % Descripcion: Predicado auxiliar para encontrar la ultima posicion en el tablero (dividido en 4 casos)
 ultimaPosicionAux([], [], UltimaPosicion, UltimaPosicion):- !. %Caso base: No queda nada por comparar.
-
 % Casos de comparacion :
 ultimaPosicionAux([], [[_,PosCasilla]| ColaCasillas], Actual, NuevoMaximo) :-  %Caso : No quedan propiedades
     max(PosCasilla, Actual, IntermedioMax), ultimaPosicionAux([], ColaCasillas, IntermedioMax, NuevoMaximo).
-
 ultimaPosicionAux([[_,PosPropiedad]| ColaPropiedades], [], Actual, NuevoMaximo) :- %Caso : No quedan casillas
     max(PosPropiedad, Actual, IntermedioMax), ultimaPosicionAux(ColaPropiedades, [], IntermedioMax, NuevoMaximo).
-
 ultimaPosicionAux([[_, PosPropiedad]| ColaPropiedades], [[_, PosCasilla]| ColaCasillas], Actual, NuevoMaximo):- %Caso : Quedan ambas por comparar
     max(PosPropiedad, PosCasilla, M1), max(M1, Actual, IntermedioMax), ultimaPosicionAux(ColaPropiedades, ColaCasillas, IntermedioMax, NuevoMaximo).
 
+
+% Descripcion: Obtiene la posicion de la carcel en el tablero.
+% Dominio: Tablero (TDA tablero) X Posicion (integer)
+% Recorrido: integer
+tableroObtenerCarcel(Tablero, Posicion):-
+    tableroObtenerCasillas(Tablero, Casillas),
+    encontrarCarcel(Casillas, Posicion).
+% Predicado auxiliar para encontrar la posicion de la carcel
+% Dominio: Lista de casillas con posicion (lista de pares) X Posicion (integer)
+% Recorrido: integer
+% Recursion natural
+encontrarCarcel([[carcel, Posicion]|_], Posicion):- !.
+encontrarCarcel([_|RestoCasillas], Posicion):- 
+    encontrarCarcel(RestoCasillas, Posicion).
 
 %-----SETTERS Y MODIFIERS-----
 % Descripcion: Actualiza lista de propiedades en el tablero.

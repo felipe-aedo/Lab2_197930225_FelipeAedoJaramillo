@@ -42,7 +42,7 @@ prueba :-
     carta( 2, suerte, 'Ha sido encarcelado', irACarcel, C2),
     carta( 3, suerte, 'Gana 20.000', ganarKino, C3),
     carta( 4, comunidad, 'Cambia el impuesto del juego', cambiarImpuesto, C4),
-    carta( 5, comunidad, 'recibe 100 de cada jugador', cumpleanos, C5),
+    carta( 5, comunidad, 'Pague el 10% de su dinero al banco', pagarImpuesto, C5),
 
     % Crear tablero
     tablero([] ,[], [], [], T1),
@@ -126,7 +126,10 @@ prueba :-
 
     % renta con una casa
     juegoCalcularRentaPropiedad(G7, Prop2_3, Renta),
-    write('Renta propiedad 2 : '), writeln(Renta).
+    write('Renta propiedad 2 : '), writeln(Renta),
+    juegoExtraerCarta(G7, suerte, [1], _, G8, Carta0),
+    write('Carta extraida: '), writeln(Carta0),
+    write('Carta Aplicada al juego: \n'), writeln(G8).
 
 
 

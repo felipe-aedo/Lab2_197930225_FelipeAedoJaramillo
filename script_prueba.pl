@@ -121,12 +121,9 @@ prueba :-
     juegoConstruirCasa(G6, Prop2_2, G7),
     write('Casa construida: '), writeln(G7),
 
-    % propiedad con casa construida
-    juegoObtenerPosicion(G7, Pos2, Prop2_3),
-
     % renta con una casa
-    juegoCalcularRentaPropiedad(G7, Prop2_3, Renta),
-    write('Renta propiedad 2 : '), writeln(Renta),
+    juegoCalcularRentaJugador(G7, J2_3, Renta),
+    write('Renta Jugador 2 : '), writeln(Renta),
     juegoExtraerCarta(G7, suerte, [1], _, G8, Carta0),
     write('Carta extraida: '), writeln(Carta0),
     write('Carta Aplicada al juego: \n'), writeln(G8).

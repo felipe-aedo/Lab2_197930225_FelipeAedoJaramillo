@@ -18,7 +18,7 @@
     juegoMoverJugador/4,
     juegoConstruirCasa/3,
     juegoCalcularRentaPropiedad/3,
-    juegoCalcularRentaJugador,
+    juegoCalcularRentaJugador/3,
     juegoExtraerCarta/6
     ]).
 
@@ -117,6 +117,18 @@ juegoObtenerJugadorActual(Juego, JugadorActual):- %EL PRIMERO ES EL JUGADOR DE T
     juegoObtenerTurnoActual(Juego, Turno), 
     juegoObtenerJugador(Juego, Turno, JugadorActual).
 
+% Descripcion: Obtiene el mayor id entre los jugadores
+% Dominio: Juego (TDA juego) X UltimoTurno (integer)
+% Recorrido: integer
+juegoObtenerUltimoTurno(Juego, UltimoTurno):-
+    juegoObtenerJugadores(Juego,Jugadores),
+    ultimoTurno(Jugadores, 0, UltimoTurno).
+ultimoTurno([], UltimoTurno, UltimoTurno):- !.
+ultimoTurno([Jugador|ColaJugadores], TurnoActual, UltimoTurno):-
+    jugadorObtenerId(Jugador, ID),
+    max(TurnoActual, ID, TurnoIntermedio),
+    ultimoTurno(ColaJugadores, TurnoIntermedio, UltimoTurno).
+
 % Descripcion: Obtiene la ultima posicion en el tablero del juego.
 % Dominio: Juego (TDA juego) X Posicion (integer)
 % Recorrido: integer
@@ -205,12 +217,36 @@ juegoSetDineroBanco(Juego, Dinero, JuegoActualizado):-
     Juego = [Jugadores, Tablero, _, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles],
     juego(Jugadores, Tablero, Dinero, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles, JuegoActualizado).
 
+% Descripcion: Actualiza el turno.
+% Dominio: Juego (TDA juego) X Turno (integer) X JuegoActualizado (TDA juego).
+% Recorrido: juego
+juegoSetTurnoActual(Juego, Turno, JuegoActualizado):-
+    Juego = [Jugadores, Tablero, DineroBanco, NumeroDados, _, TasaImpuesto, MaximoCasas, MaximoHoteles],
+    juego(Jugadores, Tablero, DineroBanco, NumeroDados, Turno, TasaImpuesto, MaximoCasas, MaximoHoteles, JuegoActualizado).
+
 % Descripcion: Actualiza la tasa de impuesto del juego.
 % Dominio: Juego (TDA juego) X TasaImpuesto (integer) X JuegoActualizado (TDA juego).
 % Recorrido: juego
 juegoSetTasaImpuesto(Juego, TasaImpuesto, JuegoActualizado):-
     Juego = [Jugadores, Tablero, Dinero, NumeroDados, TurnoActual, _, MaximoCasas, MaximoHoteles],
     juego(Jugadores, Tablero, Dinero, NumeroDados, TurnoActual, TasaImpuesto, MaximoCasas, MaximoHoteles, JuegoActualizado).
+
+% Descripcion: Compra una propiedad el jugador de turno.
+% Dominio: Juego (TDA juego)  X JuegoActualizado (TDA juego)
+% Recorrido : juego
+juegoComprarPropiedad(Juego, JuegoActualizado):-
+    juegoObtenerJugadorActual(Juego, Jugador),
+    jugadorObtenerPosicion(Jugador, Posicion),
+    juegoObtenerPosicion(Juego, Posicion, Propiedad),
+    esPropiedad(Propiedad),
+    jugadorObtenerDinero(Jugador, Dinero1),
+    juegoObtenerDineroBanco(Juego, DineroBanco),
+    jugadorComprarPropiedad(Jugador, Propiedad, JugadorActualizado),
+    jugadorObtenerDinero(Jugador, Dinero2),
+    VerificaCompra is Dinero1 - Dinero2, %Si no se compro la propiedad, no cambia el dinero del banco
+    DineroBancoActualizado is DineroBanco + VerificaCompra,
+    juegoSetDineroBanco(Juego, DineroBancoActualizado, JuegoBancoActualizado),
+    juegoActualizarJugador(JuegoBancoActualizado, JugadorActualizado, JuegoActualizado).
 
 % Descripcion: Actualiza una propiedad en el juego construyendo una casa en ella
 % Dom: Juego (TDA juego) X Propiedad (TDA propiedad) X JuegoActualizado (TDA juego)
@@ -270,8 +306,8 @@ acumularRentas(_, [], 0):- !.
 acumularRentas(Juego, [IdPropiedad|RestoProps], RentaTotal):-
     juegoObtenerPropiedad(Juego, IdPropiedad, Propiedad),
     juegoCalcularRentaPropiedad(Juego, Propiedad, Renta),
-    RentaTotal is Renta + RestoRenta,
-    acumularRentas(Juego, RestoProps, RestoRenta).
+    acumularRentas(Juego, RestoProps, RestoRenta),
+    RentaTotal is Renta + RestoRenta.
 
 % Descripcion: Cobra dinero a un jugador para ser guardado en el banco.
 % Dominio: Juego (TDA juego) X Jugador (TDA jugador) X Monto (integer) X JuegoActualizado (TDA juego).
@@ -279,8 +315,9 @@ acumularRentas(Juego, [IdPropiedad|RestoProps], RentaTotal):-
 juegoCobrarJugador(Juego, Jugador, Monto, JuegoActualizado):-
     juegoObtenerDineroBanco(Juego, DineroBanco),
     jugadorObtenerDinero(Jugador, DineroJugador),
-    DineroJugador >= Monto, DineroJugadorActualizado = DineroJugador - Monto,
-    DineroBancoActualizado = DineroBanco + Monto,
+    DineroJugador >= Monto, 
+    DineroJugadorActualizado is DineroJugador - Monto,
+    DineroBancoActualizado is DineroBanco + Monto,
     juegoSetDineroBanco(Juego, DineroBancoActualizado, JuegoBancoActualizado),
     jugadorSetDinero(Jugador, DineroJugadorActualizado, JugadorActualizado),
     juegoActualizarJugador(JuegoBancoActualizado, JugadorActualizado, JuegoActualizado).
@@ -295,8 +332,9 @@ juegoMoverJugador(Juego, ID, Dados, JuegoActualizado):-
     sumarLista(Dados, Movimiento),
     PosicionActualizada is Posicion + Movimiento,
     jugadorSetPosicion(Jugador, PosicionActualizada, JugadorPre), %Necesario cobrar impuesto antes de corregir posicion
+    juegoImpuestoPropiedades(Juego, JugadorPre, JuegoParcial),
     jugadorCorregirPosicion(JugadorPre, UltimaPosicion, JugadorActualizado),
-    juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).
+    juegoActualizarJugador(JuegoParcial, JugadorActualizado, JuegoActualizado).
 
 % Descripcion: Juega la cantidad de dados indicadas en el TDA juego.
 % Dominio: Juego (TDA juego) X Seeds (lista de integer) X NuevasSeeds (lista de integer) X Resultados (lista de integer)
@@ -316,9 +354,18 @@ lanzar_dados([Seed | RestoSeeds], N, [NvaSeed | NuevasSeeds], [R | Resultados]):
     N1 is N - 1,
     lanzar_dados(RestoSeeds, N1, NuevasSeeds, Resultados).
 
+% Descripcion: Cobra impuesto por propiedad al jugador
+% Dominio: Juego (TDA juego) X Jugador (TDA jugador) X JuegoActualizado (TDA juego)
+% Recorrido: juego
+juegoImpuestoPropiedades(Juego, Jugador, JuegoActualizado):-
+    juegoCalcularRentaJugador(Juego, Jugador, Renta),
+    juegoObtenerTasaImpuesto(Juego, TasaImpuesto),
+    Cobro is (TasaImpuesto * Renta) // 100,
+    juegoCobrarJugador(Juego, Jugador, Cobro, JuegoActualizado).
+
 % Descripcion: Obtiene una carta aleatoria de un tipo especificado
-% Dominio: Tablero (TDA tablero) X TipoCarta (Atom) X Cartas (Lista de cartas)
-% Recorrido: lista de cartas
+% Dominio: Juego (TDA juego) X TipoCarta (Atom) X Seed (integer) X NuevaSeed (integer) X Carta (TDA carta)
+% Recorrido: JuegoActualizado X Carta
 juegoExtraerCarta(Juego, TipoCarta, [Seed], [NuevaSeed], JuegoActualizado, Carta) :-
     juegoObtenerCartas(Juego, TipoCarta, Cartas),
     length(Cartas, CantidadCartas),
@@ -333,6 +380,23 @@ juegoExtraerCarta(Juego, TipoCarta, [Seed], [NuevaSeed], JuegoActualizado, Carta
 juegoEjecutarCarta(Juego, Carta, JuegoActualizado):-
     cartaObtenerAccion(Carta, Accion),
     call(Accion, Juego, JuegoActualizado).
+
+% Descripcion: Avanza de turno el juego.
+% Dominio: Juego (TDA juego) X Juego (TDA juego)
+% Recorrido: juego
+juegoAvanzarTurno(Juego, JuegoActualizado):-
+    juegoObtenerTurnoActual(Juego,TurnoActual),
+    juegoObtenerUltimoTurno(Juego, UltimoTurno),
+    TurnoActual < UltimoTurno,
+    TurnoActualizado is TurnoActual + 1,
+    juegoSetTurnoActual(Juego, TurnoActualizado, JuegoActualizado).
+juegoAvanzarTurno(Juego, JuegoActualizado):-
+    juegoObtenerTurnoActual(Juego,TurnoActual),
+    juegoObtenerUltimoTurno(Juego, UltimoTurno),
+    TurnoActual = UltimoTurno,
+    juegoSetTurnoActual(Juego, 1, JuegoActualizado).
+
+%juegoJugarTurno()
 
 % ------Acciones de cartas (tipo suerte) --------
 % Descripcion: Mueve al jugador actual hasta la salida
@@ -372,9 +436,7 @@ pagarImpuesto(Juego, JuegoActualizado):-
     juegoObtenerJugadorActual(Juego, Jugador),
     jugadorObtenerDinero(Jugador, Dinero),
     Cobro is Dinero * 0.1, CobroAprox is round(Cobro),
-    DineroActualizado is Dinero - CobroAprox,
-    jugadorSetDinero(Jugador, DineroActualizado, JugadorActualizado),
-    juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).
+    juegoCobrarJugador(Juego, Jugador, CobroAprox, JuegoActualizado).
 
 % Descripcion: Cambia el impuesto del juego siguiendo este orden (5% - 10% - 15%)
 % Dominio: Juego (TDA juego)  X JuegoActualizado (TDA juego)

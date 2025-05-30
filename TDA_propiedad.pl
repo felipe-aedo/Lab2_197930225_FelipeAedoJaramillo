@@ -12,7 +12,8 @@
     propiedadEstaHipotecada/1,
     propiedadSetDueno/3,
     propiedadSetCasas/3,
-    propiedadSetHotel/3
+    propiedadSetHotel/3,
+    propiedadHipotecar/2
     ]).
 
 :- use_module(operadores_aux).

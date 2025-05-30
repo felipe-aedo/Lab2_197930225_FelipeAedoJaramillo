@@ -141,10 +141,10 @@ jugadorCorregirPosicion(Jugador, UltimaPosicion, Jugador):-
 jugadorComprarPropiedad(Jugador, Propiedad, JugadorActualizado):-
     jugadorObtenerDinero(Jugador, Dinero), propiedadObtenerPrecio(Propiedad, Precio), Dinero >= Precio,
     propiedadObtenerDueno(Propiedad, Dueno), Dueno = [], DineroAct is Dinero - Precio, propiedadObtenerId(Propiedad, ID),
-    jugadorSetDinero(Jugador, DineroAct, JugadorPaga), jugadorAgregarPropiedad(JugadorPaga, ID, JugadorActualizado).
+    jugadorSetDinero(Jugador, DineroAct, JugadorPaga), jugadorAgregarPropiedad(JugadorPaga, ID, JugadorActualizado), !.
 jugadorComprarPropiedad(Jugador, Propiedad, Jugador):- %retorna sin cambios si no pudo comprar
     jugadorObtenerDinero(Jugador, Dinero), propiedadObtenerPrecio(Propiedad, Precio), propiedadObtenerDueno(Propiedad, Dueno),
-    (Dueno \= [] ; Dinero < Precio).
+    (Dueno \= [] ; Dinero < Precio), !.
 
 % Descripcion: Transfiere dinero de un jugador a otro 
 % Dominio: JugadorPagadorIN (TDA jugador) X JugadorReceptorIN (TDA jugador) X Monto (integer) X JugadorPagadorOUT (TDA jugador) X JugadorReceptorOUT (TDA jugador)

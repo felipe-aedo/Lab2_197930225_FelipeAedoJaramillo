@@ -19,7 +19,8 @@
     jugadorComprarPropiedad/3,
     jugadorPagarRenta/5,
     jugadorCorregirPosicion/3,
-    jugadorPoseePropiedad/2
+    jugadorPoseePropiedad/2,
+    jugadorActualizarPropiedades/3
     ]).
 
 :- use_module([operadores_aux_197930225_AedoJaramillo, 
@@ -104,6 +105,13 @@ jugadorSetDinero(Jugador, NuevoDinero, JugadorActualizado):-
 jugadorAgregarPropiedad(Jugador, NuevaPropiedad, JugadorActualizado):-
     Jugador = [ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, CartasCarcel],
     jugador(ID, Nombre, Dinero, [NuevaPropiedad|Propiedades], Posicion, EstaenCarcel, CartasCarcel, JugadorActualizado).
+
+% Descripcion: Actualiza lista de propiedades del jugador
+% Dominio: Jugador (TDA jugador) X lista de propeidades (lista de integer) X JugadorActualizado (TDA jugador)
+% Recorrido: jugador
+jugadorActualizarPropiedades(Jugador, Propiedades, JugadorActualizado):-
+    Jugador = [ID, Nombre, Dinero, _, Posicion, EstaenCarcel, CartasCarcel],
+    jugador(ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, CartasCarcel, JugadorActualizado).
 
 % Descripcion: Modifica la posicion del jugador
 % Dominio: Jugador (TDA jugador) X NuevaPosicion (integer) X JugadorActualizado (TDA jugador)

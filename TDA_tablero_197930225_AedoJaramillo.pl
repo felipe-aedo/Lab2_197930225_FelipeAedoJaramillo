@@ -62,19 +62,19 @@ tableroObtenerCasillas(Tablero, Casillas):-
 % Dominio : Tablero (TDA tablero) X Posicion (integer) X Elemento (Propiedad o casillaEspecial)
 % Recorrido : casilla o propiedad
 tableroObtenerPosicion(Tablero, Posicion, Elemento):-
-    tableroObtenerPropiedades(Tablero, Propiedades),
+    tableroObtenerPropiedades(Tablero, Props),
     tableroObtenerCasillas(Tablero, Casillas),
-    encontrarPosicion(Propiedades, Casillas, Posicion, Elemento).
+    (   buscarPorPosicion(Props, Posicion, Elemento)
+    ;   buscarPorPosicion(Casillas, Posicion, Elemento)
+    ), !.
 
 %Predicado auxiliar para encontrar posicion en el tablero
-% Dominio: lista de pares(propiedad, pos) X lista de pares(casilla, pos) X posicion (integer) X elemento (TDA propiedad o casilla)
+% Dominio: lista de pares(propiedad, posicion) X posicion (integer) X elemento (TDA propiedad o casilla)
 % Recorrido: propiedad o casilla
 %Recursion Natural
-encontrarPosicion([],[], _, []) :- !.
-encontrarPosicion([[Propiedad, PosProp]|_], _, Posicion, Propiedad):- Posicion = PosProp, !.
-encontrarPosicion(_, [[Casilla, PosCasilla]|_], Posicion, Casilla):- Posicion = PosCasilla, !.
-encontrarPosicion([_|RestoProps], [_|RestoCasillas], Posicion, Elemento):-
-    encontrarPosicion(RestoProps, RestoCasillas, Posicion, Elemento).
+buscarPorPosicion([[Elem, Pos]|_], Pos, Elem):- !.
+buscarPorPosicion([_|Resto], Pos, Elem):-
+    buscarPorPosicion(Resto, Pos, Elem).
 
 % Descripcion: Obtiene la ultima posicion en el tablero.
 % Dominio: Tablero (TDA tablero) X Posicion (integer)

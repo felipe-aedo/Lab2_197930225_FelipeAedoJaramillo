@@ -1,4 +1,4 @@
-:- module(operadores_aux_197930225_AedoJaramillo, [boolean/1, max/3, sumarLista/2, getDadoRandom/3, myMember/2]).
+:- module(operadores_aux_197930225_AedoJaramillo, [boolean/1, max/3, sumarLista/2, getDadoRandom/3, getRandomInRange/4 ,myMember/2]).
 
 %Operadores de pertenencia booleana
 boolean(true).
@@ -17,7 +17,7 @@ myMember(X,[_|Y]):- myMember(X, Y).
 
 %Suma los valores contenidos en una lista
 % Caso base.
-sumarLista([], 0).
+sumarLista([], 0):- !.
 % Caso recursivo.
 sumarLista([Head|Tail], Suma) :-
     sumarLista(Tail, SumaCola),
@@ -33,3 +33,8 @@ myRandom(Xn, Xn1):-
 getDadoRandom(Seed, NvaSeed, R):-
     myRandom(Seed, NvaSeed),
     R is 1 + (NvaSeed mod 6).
+
+% getRandomInRange(Para seleccionar una carta tambien recibe el largo de la lista de cartas)
+getRandomInRange(Seed, NewSeed, Max, Result):-
+    myRandom(Seed, NewSeed),
+    Result is 1 + (NewSeed mod Max).

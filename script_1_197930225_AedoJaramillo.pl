@@ -34,7 +34,7 @@ prueba :-
     % Crear cartas
     carta( 1, suerte, 'Avance hasta la casilla de salida', irASalida, C1),
     carta( 2, suerte, 'Ha sido encarcelado', irACarcel, C2),
-    carta( 3, suerte, 'Gana 20.000', ganarKino, C3),
+    carta( 3, suerte, 'Ha ganado la loteria! (banco paga $5.000)', ganarKino, C3),
     carta( 4, suerte, 'Obtiene carta para salir de la carcel', obtenerCartaSalirCarcel, C4),
     carta( 5, comunidad, 'Cambia el impuesto del juego', cambiarImpuesto, C5),
     carta( 6, comunidad, 'Pague el 10% de su dinero al banco', pagarImpuesto, C6),

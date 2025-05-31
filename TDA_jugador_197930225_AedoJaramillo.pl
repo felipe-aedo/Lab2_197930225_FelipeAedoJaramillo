@@ -1,6 +1,6 @@
 % TDA jugador
 
-:- module(tda_jugador, [
+:- module(tda_jugador_197930225_AedoJaramillo, [
     jugador/8,
     esJugador/1,
     jugadorObtenerId/2,
@@ -10,6 +10,7 @@
     jugadorObtenerPosicion/2,
     jugadorEstaenCarcel/2,
     jugadorObtenerCartasCarcel/2,
+    jugadorEstaEnBancarrota/1,
     jugadorSetDinero/3,
     jugadorAgregarPropiedad/3,
     jugadorSetPosicion/3,
@@ -17,10 +18,13 @@
     jugadorSetCartasCarcel/3,
     jugadorComprarPropiedad/3,
     jugadorPagarRenta/5,
-    jugadorCorregirPosicion/3
+    jugadorCorregirPosicion/3,
+    jugadorPoseePropiedad/2
     ]).
 
-:- use_module([operadores_aux, tda_propiedad]). %Importar libreria de operadores
+:- use_module([operadores_aux_197930225_AedoJaramillo, 
+    tda_propiedad_197930225_AedoJaramillo
+    ]). %Importar libreria de operadores
 
 %-----CONSTRUCTOR-----
 % Descripcion: Constructor TDA jugador (formato lista)
@@ -167,8 +171,13 @@ jugadorPagarRenta(JugadorPagadorIN, JugadorReceptorIN, Monto, JugadorPagadorOUT,
     jugadorSetDinero(JugadorPagadorIN, 0, JugadorPagadorOUT),
     jugadorSetDinero(JugadorReceptorIN, DineroReceptorOUT, JugadorReceptorOUT), !.
 
+% Descripcion: Verifica si un jugador posee una propiedad
+% Dominio: Jugador (TDA jugador) X IdPropiedad (integer)
+jugadorPoseePropiedad(Jugador, IdPropiedad):-
+    jugadorObtenerPropiedades(Jugador, Propiedades),
+    myMember(IdPropiedad, Propiedades).
+
 % Descripcion: Verifica si un jugador esta en bancarrotra (Sin dinero).
 % Dominio: Jugador (TDA jugador)
-% Recorrido: boolean
 jugadorEstaEnBancarrota(Jugador):-
     jugadorObtenerDinero(Jugador, Dinero), Dinero = 0.

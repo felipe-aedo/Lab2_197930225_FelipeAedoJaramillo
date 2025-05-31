@@ -1,6 +1,6 @@
 %TDA tablero
 
-:- module(tda_tablero, [
+:- module(tda_tablero_197930225_AedoJaramillo, [
     tablero/5,
     tableroAgregarPropiedades/3,
     tableroAgregarCasillasEspeciales/3,
@@ -13,7 +13,7 @@
     tableroActualizarPropiedad/3
     ]).
 
-:- use_module([operadores_aux, tda_propiedad]).
+:- use_module([operadores_aux_197930225_AedoJaramillo, tda_propiedad_197930225_AedoJaramillo]).
 
 %-----CONSTRUCTOR-----
 % Descripcion: Constructor TDA tablero

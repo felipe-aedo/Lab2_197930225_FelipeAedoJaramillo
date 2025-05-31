@@ -1,6 +1,6 @@
 %TDA propiedad
 
-:- module(tda_propiedad, [
+:- module(tda_propiedad_197930225_AedoJaramillo, [
     propiedad/9,
     esPropiedad/1,
     propiedadObtenerId/2,
@@ -13,10 +13,11 @@
     propiedadSetDueno/3,
     propiedadSetCasas/3,
     propiedadSetHotel/3,
-    propiedadHipotecar/2
+    propiedadHipotecar/2,
+    propiedadDeshipotecar/2
     ]).
 
-:- use_module(operadores_aux).
+:- use_module(operadores_aux_197930225_AedoJaramillo).
 
 %-----CONSTRUCTOR-----
 % Descripcion: Constructor TDA propiedad
@@ -106,3 +107,10 @@ propiedadSetHotel(Propiedad, Estado, PropiedadActualizada):-
 propiedadHipotecar(Propiedad, PropiedadActualizada):-
     Propiedad = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstadoHipoteca], EstadoHipoteca \= true,
     propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, true, PropiedadActualizada).
+
+% Descripcion: Levanta la hipoteca de una propiedad
+% Dominio: PropiedadIN (TDA propiedad) X PropiedadOut (TDA propiedad)
+% Recorrido: propiedad
+propiedadDeshipotecar(Propiedad, PropiedadActualizada):-
+    Propiedad = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstadoHipoteca], EstadoHipoteca \= false,
+    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, false, PropiedadActualizada).

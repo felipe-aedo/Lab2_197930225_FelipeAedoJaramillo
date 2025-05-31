@@ -1,6 +1,6 @@
 %TDA juego
 
-:- module(tda_juego, [
+:- module(tda_juego_197930225_AedoJaramillo, [
     juego/9,
     esJuego/1,
     juegoObtenerJugadores/2,
@@ -27,7 +27,12 @@
     juegoJugarTurno/6
     ]).
 
-:- use_module([tda_jugador, tda_propiedad, tda_tablero, tda_carta, operadores_aux]).
+:- use_module([tda_jugador_197930225_AedoJaramillo, 
+    tda_propiedad_197930225_AedoJaramillo, 
+    tda_tablero_197930225_AedoJaramillo, 
+    tda_carta_197930225_AedoJaramillo, 
+    operadores_aux_197930225_AedoJaramillo
+    ]).
 
 %-----CONSTRUCTOR-----
 % Descripcion: Constructor TDA Juego
@@ -47,7 +52,7 @@ esJuego(Juego):-
     is_list(Tablero),
     integer(DineroBanco), integer(NumeroDados), integer(TurnoActual),
     integer(TasaImpuesto), integer(MaximoCasas), integer(MaximoHoteles),
-    DineroBanco >= 0, NumeroDados > 0, TurnoActual >= 0,
+    DineroBanco >= 0, NumeroDados > 0, TurnoActual >= -1,
     TasaImpuesto >= 0, MaximoCasas >= 0, MaximoHoteles >= 0.
 
 %------GETTERS------
@@ -267,11 +272,13 @@ juegoComprarPropiedad(Juego, JuegoActualizado):-
     juegoSetDineroBanco(Juego2, DineroBancoActualizado, JuegoActualizado), !.
 juegoComprarPropiedad(Juego, Juego):- !.
 
-% Descripcion: Actualiza una propiedad en el juego construyendo una casa en ella
-% Dom: Juego (TDA juego) X Propiedad (TDA propiedad) X JuegoActualizado (TDA juego)
+% Descripcion: Construye una casa para la propiedad del jugador actual. actualiza jugador y propiedad
+% Dom: Juego (TDA juego) X IdPropiedad (integer) X JuegoActualizado (TDA juego)
 % Rec: juego
-juegoConstruirCasa(Juego, Propiedad, JuegoActualizado):-
+juegoConstruirCasa(Juego, IdPropiedad, JuegoActualizado):-
     juegoObtenerJugadorActual(Juego, Jugador),
+    juegoObtenerPropiedad(Juego, IdPropiedad, Propiedad),
+    jugadorPoseePropiedad(Jugador, IdPropiedad),
     juegoObtenerMaximoCasas(Juego, MaximoCasas),
     jugadorObtenerDinero(Jugador, Dinero),
     propiedadObtenerCasas(Propiedad, Casas),
@@ -281,34 +288,73 @@ juegoConstruirCasa(Juego, Propiedad, JuegoActualizado):-
     propiedadSetCasas(Propiedad, NCasas, PropiedadActualizada),
     juegoCobrarJugador(Juego, Jugador, Precio, Juego1),
     juegoActualizarPropiedad(Juego1, PropiedadActualizada, JuegoActualizado), !.
-juegoConstruirCasa(Juego, _, Juego):- !.
+juegoConstruirCasa(Juego, _, Juego):- !. %no es posible construir
 
-% Descripcion: Actualiza una propiedad en el juego construyendo un hotel
-% Dom: Juego (TDA juego) X Propiedad (TDA propiedad) X JuegoActualizado (TDA juego)
+% Descripcion: Construye un hotel para la propiedad del jugador actual. actualiza propiedad
+% Dom: Juego (TDA juego) X IdPropiedad (integer) X JuegoActualizado (TDA juego)
 % Rec: juego
-juegoConstruirHotel(Juego, Propiedad, JuegoActualizado):-
+juegoConstruirHotel(Juego, IdPropiedad, JuegoActualizado):-
+    juegoObtenerJugadorActual(Juego, Jugador),
+    jugadorPoseePropiedad(Jugador, IdPropiedad),
+    juegoObtenerPropiedad(Juego, IdPropiedad, Propiedad),
     juegoObtenerMaximoCasas(Juego, MaximoCasas),
     propiedadObtenerCasas(Propiedad, Casas),
     Casas = MaximoCasas,
     \+ propiedadEsHotel(Propiedad),
     propiedadSetHotel(Propiedad, true, PropiedadConHotel),
     propiedadSetCasas(PropiedadConHotel, 0, PropiedadActualizada),
-    juegoActualizarPropiedad(Juego, PropiedadActualizada, JuegoActualizado).
-juegoConstruirHotel(Juego, Propiedad, Juego):- %no es posible construir
-    juegoObtenerMaximoCasas(Juego, MaximoCasas),
-    propiedadObtenerCasas(Propiedad, Casas),
-    (Casas \= MaximoCasas ; propiedadEsHotel(Propiedad)).
+    juegoActualizarPropiedad(Juego, PropiedadActualizada, JuegoActualizado), !.
+juegoConstruirHotel(Juego, _, Juego):- !. % no es posible construir
 
 
 % Descripcion: Hipoteca una propiedad en el juego
-% Dominio: Jiegp (TDA juego) X IdPropiedad (integer) X JuegoActualizado (TDA juego)
+% Dominio: Juego (TDA juego) X IdPropiedad (integer) X JuegoActualizado (TDA juego)
 % Recorrido: juego
-juegoHipotecarPropiedad(Juego, IdPropiedad, JuegoActualizado):-
-    juegoObtenerJugadorActual(Juego, JugadorActual), jugadorObtenerId(JugadorActual, IDJugadorActual),
-    IdPropiedad = IDJugadorActual,
+juegoHipotecarPropiedad(Juego, IdPropiedad, JuegoActualizado) :-
+    juegoObtenerJugadorActual(Juego, JugadorActual),
     juegoObtenerPropiedad(Juego, IdPropiedad, Propiedad),
+    jugadorPoseePropiedad(JugadorActual, IdPropiedad),
+    \+ propiedadEstaHipotecada(Propiedad), % Hipotecar propiedad y actualizarla en el juego
     propiedadHipotecar(Propiedad, PropHipotecada),
-    juegoActualizarPropiedad(Juego, PropHipotecada, JuegoActualizado).
+    juegoActualizarPropiedad(Juego, PropHipotecada, JuegoA1),
+    propiedadObtenerPrecio(Propiedad, Precio),
+    MontoHipoteca is Precio // 2,
+    jugadorObtenerDinero(JugadorActual, DineroJugador),
+    DineroJugadorActualizado is DineroJugador + MontoHipoteca,
+    jugadorSetDinero(JugadorActual, DineroJugadorActualizado, JugadorActualizado),
+    juegoActualizarJugador(JuegoA1, JugadorActualizado, JuegoA2),
+    juegoObtenerDineroBanco(JuegoA2, DineroBanco),
+    DineroBancoActualizado is DineroBanco - MontoHipoteca,
+    juegoSetDineroBanco(JuegoA2, DineroBancoActualizado, JuegoActualizado), 
+    write('La propiedad '), write(IdPropiedad), write(' a sido hipotecada\n'), !.
+juegoHipotecarPropiedad(Juego, _, Juego):- 
+    write('No es posible realizar la hipoteca\n'), !.
+
+% Descripción: Levanta la hipoteca de una propiedad
+% Dominio: Juego (TDA juego), IdPropiedad (int), JuegoActualizado (TDA juego)
+% Recorrido: JuegoActualizado
+juegoLevantarHipoteca(Juego, IdPropiedad, JuegoActualizado):-
+    juegoObtenerJugadorActual(Juego, Jugador),
+    jugadorPoseePropiedad(Jugador, IdPropiedad),
+    juegoObtenerPropiedad(Juego, IdPropiedad, Propiedad),
+    propiedadEstaHipotecada(Propiedad),  % Debe estar hipotecada
+    propiedadObtenerPrecio(Propiedad, Precio),
+    juegoObtenerTasaImpuesto(Juego, Tasa),
+    MontoBase is Precio // 2,
+    Interes is (MontoBase * Tasa) // 100,
+    MontoTotal is MontoBase + Interes,
+    jugadorObtenerDinero(Jugador, DineroJugador), juegoObtenerDineroBanco(Juego, DineroBanco),
+    DineroBancoActualizado is DineroBanco + MontoTotal,
+    DineroJugador >= MontoTotal,  % Debe poder pagar
+    DineroRestante is DineroJugador - MontoTotal,
+    jugadorSetDinero(Jugador, DineroRestante, JugadorActualizado),
+    propiedadDeshipotecar(Propiedad, PropiedadActualizada),
+    juegoActualizarJugador(Juego, JugadorActualizado, Juego1),
+    juegoActualizarPropiedad(Juego1, PropiedadActualizada, Juego2),
+    juegoSetDineroBanco(Juego2, DineroBancoActualizado, JuegoActualizado),    
+    write('La propiedad '), write(IdPropiedad), write(' a sido deshipotecada\n'), !.
+juegoLevantarHipoteca(Juego, _, Juego):-
+    write('No es posible levantar la hipoteca\n'), !.
 
 % Descripcion: Calcula la renta de una propiedad
 % Dominio: Juego (TDA juego) X propiedad (TDA propiedad) X Monto (number)
@@ -349,6 +395,15 @@ acumularRentas(Juego, [IdPropiedad|RestoProps], RentaTotal):-
 juegoCobrarJugador(Juego, Jugador, Monto, JuegoActualizado):-
     juegoObtenerDineroBanco(Juego, DineroBanco),
     jugadorObtenerDinero(Jugador, DineroJugador),
+    DineroJugador < Monto, 
+    DineroJugadorActualizado is 0,
+    DineroBancoActualizado is DineroBanco + DineroJugador,
+    juegoSetDineroBanco(Juego, DineroBancoActualizado, JuegoBancoActualizado),
+    jugadorSetDinero(Jugador, DineroJugadorActualizado, JugadorActualizado),
+    juegoActualizarJugador(JuegoBancoActualizado, JugadorActualizado, JuegoActualizado).
+juegoCobrarJugador(Juego, Jugador, Monto, JuegoActualizado):-
+    juegoObtenerDineroBanco(Juego, DineroBanco),
+    jugadorObtenerDinero(Jugador, DineroJugador),
     DineroJugador >= Monto, 
     DineroJugadorActualizado is DineroJugador - Monto,
     DineroBancoActualizado is DineroBanco + Monto,
@@ -362,6 +417,7 @@ juegoCobrarJugador(Juego, Jugador, Monto, JuegoActualizado):-
 juegoPagarRenta(Juego, Propiedad ,JuegoActualizado):-
     propiedadObtenerDueno(Propiedad, Dueno),
     Dueno \= [],
+    \+ propiedadEstaHipotecada(Propiedad), %propiedad hipotecada no cobra renta
     juegoObtenerJugadorActual(Juego, JugadorActual), jugadorObtenerId(JugadorActual, IDJugadorActual),
     IDJugadorActual \= Dueno,
     juegoObtenerJugador(Juego, Dueno, JugadorPropietario),
@@ -371,10 +427,13 @@ juegoPagarRenta(Juego, Propiedad ,JuegoActualizado):-
     juegoActualizarJugador(JuegoA1, JProp2, JuegoActualizado), !.
 juegoPagarRenta(Juego, _, Juego):- !.
 
-
-% Descripcion: Mueve al jugador en el tablero actualizando el juego.
+% Descripcion: Mueve al jugador en el tablero actualizando el juego, tambien corrige la posicion en caso de sobrepasar ultima posicion (y cobra impuestos).
 % Dominio: Juego (TDA juego) X ID (integer) X Dados (lista integer) X JuegoActualizado (TDA juego)
 % Recorrido: juego
+juegoMoverJugador(Juego, ID, _, Juego):-
+    juegoObtenerJugador(Juego, ID, Jugador),
+    jugadorEstaenCarcel(Jugador, Estado),
+    Estado = true, !.
 juegoMoverJugador(Juego, ID, Dados, JuegoActualizado):-
     juegoObtenerJugador(Juego, ID, Jugador),
     juegoObtenerUltimaPosicion(Juego, UltimaPosicion),
@@ -382,9 +441,11 @@ juegoMoverJugador(Juego, ID, Dados, JuegoActualizado):-
     sumarLista(Dados, Movimiento),
     PosicionActualizada is Posicion + Movimiento,
     jugadorSetPosicion(Jugador, PosicionActualizada, JugadorPre), %Necesario cobrar impuesto antes de corregir posicion
-    juegoImpuestoPropiedades(Juego, JugadorPre, JuegoParcial),
-    jugadorCorregirPosicion(JugadorPre, UltimaPosicion, JugadorActualizado),
-    juegoActualizarJugador(JuegoParcial, JugadorActualizado, JuegoActualizado).
+    juegoActualizarJugador(Juego, JugadorPre, JuegoA1),
+    juegoImpuestoPropiedades(JuegoA1, JuegoA2),
+    juegoObtenerJugadorActual(JuegoA2, JugadorCobrado),
+    jugadorCorregirPosicion(JugadorCobrado, UltimaPosicion, JugadorActualizado),
+    juegoActualizarJugador(JuegoA2, JugadorActualizado, JuegoActualizado), !.
 
 % Descripcion: Juega la cantidad de dados indicadas en el TDA juego.
 % Dominio: Juego (TDA juego) X Seeds (lista de integer) X NuevasSeeds (lista de integer) X Resultados (lista de integer)
@@ -407,15 +468,21 @@ lanzar_dados([Seed | RestoSeeds], N, [NvaSeed | NuevasSeeds], [R | Resultados]):
 % Descripcion: Cobra impuesto por propiedad al jugador
 % Dominio: Juego (TDA juego) X Jugador (TDA jugador) X JuegoActualizado (TDA juego)
 % Recorrido: juego
-juegoImpuestoPropiedades(Juego, Jugador, JuegoActualizado):-
+juegoImpuestoPropiedades(Juego, Juego) :-
     juegoObtenerUltimaPosicion(Juego, UltimaPosicion),
+    juegoObtenerJugadorActual(Juego, Jugador),
+    jugadorObtenerPosicion(Jugador, PosicionJugador),
+    PosicionJugador =< UltimaPosicion.
+juegoImpuestoPropiedades(Juego, JuegoActualizado) :-
+    juegoObtenerUltimaPosicion(Juego, UltimaPosicion),
+    juegoObtenerJugadorActual(Juego, Jugador),
     jugadorObtenerPosicion(Jugador, PosicionJugador),
     PosicionJugador > UltimaPosicion,
     juegoCalcularRentaJugador(Juego, Jugador, Renta),
     juegoObtenerTasaImpuesto(Juego, TasaImpuesto),
     Cobro is (TasaImpuesto * Renta) // 100,
     juegoCobrarJugador(Juego, Jugador, Cobro, JuegoActualizado).
-juegoImpuestoPropiedades(Juego, _, Juego).
+
 
 % Descripcion: Obtiene una carta aleatoria de un tipo especificado
 % Dominio: Juego (TDA juego) X TipoCarta (Atom) X Seed (integer) X NuevaSeed (integer) X Carta (TDA carta)
@@ -447,6 +514,8 @@ juegoPagarMultaCarcel(Juego, Jugador, JuegoActualizado):-
 % Descripcion: Avanza de turno el juego.
 % Dominio: Juego (TDA juego) X Juego (TDA juego)
 % Recorrido: juego
+juegoAvanzarTurno(Juego, JuegoFinalizado):-
+    juegoTerminar(Juego, JuegoFinalizado), !.
 juegoAvanzarTurno(Juego, JuegoActualizado):-
     juegoObtenerTurnoActual(Juego,TurnoActual),
     juegoObtenerUltimoTurno(Juego, UltimoTurno),
@@ -463,7 +532,15 @@ juegoAvanzarTurno(Juego, JuegoActualizado):-
 % Descripcion: Predicado para ejecutar todo un turno. Separado en cuatro casos posibles.
 % Dominio: Juego (TDA juego) X SeedDados (list integer) X NSeedDados (List integer) X Dados (list integer)
 % Recorrido: juego
-%Caso 1: Cae en la salida
+%Caso 1: Estaba encarcelado
+juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, _, JuegoActualizado):-
+    juegoLanzarDados(Juego, SeedDados, NSeedDados, Dados),
+    juegoObtenerJugadorActual(Juego, JugadorActual),
+    jugadorEstaenCarcel(JugadorActual, Estado), Estado = true,
+    write('Dados lanzados: '), writeln(Dados),
+    call(Accion, Juego, JuegoA2), %Ejecutar accion de input (usar carta carcel)
+    juegoAvanzarTurno(JuegoA2, JuegoActualizado), !.
+%Caso 2: Cae en salida
 juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento, JuegoActualizado):-
     juegoLanzarDados(Juego, SeedDados, NSeedDados, Dados),
     juegoObtenerJugadorActual(Juego, JugadorActual),
@@ -474,6 +551,7 @@ juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento, JuegoActualizad
     write('Dados lanzados: '), writeln(Dados),
     call(Accion, JuegoA1, Argumento, JuegoA2), %Ejecutar accion de input (como hipotecar alguna propiedad)
     juegoAvanzarTurno(JuegoA2, JuegoActualizado), !.
+
 %Caso 2: Cae en la carcel
 juegoJugarTurno(Juego, SeedDados, NSeedDados, _, _,JuegoActualizado):-
     juegoLanzarDados(Juego, SeedDados, NSeedDados, Dados),
@@ -485,6 +563,7 @@ juegoJugarTurno(Juego, SeedDados, NSeedDados, _, _,JuegoActualizado):-
     write('Dados lanzados: '), writeln(Dados),
     irACarcel(JuegoA1, JuegoA2), %encarcelado y pierde su accion de turno
     juegoAvanzarTurno(JuegoA2, JuegoActualizado), !.
+
 %Caso 3: Cae en una carta
 juegoJugarTurno(Juego, [S1|TS], NSeedDados, Accion, Argumento, JuegoActualizado):-
     juegoLanzarDados(Juego, [S1|TS], NSeedDados, Dados),
@@ -495,9 +574,11 @@ juegoJugarTurno(Juego, [S1|TS], NSeedDados, Accion, Argumento, JuegoActualizado)
     (CasillaCaida = suerte ; CasillaCaida = comunidad), %cae en carta
     write('Dados lanzados: '), writeln(Dados),
     juegoExtraerCarta(JuegoA1, CasillaCaida, [S1], _, JuegoA2, Carta), %ejecutar carta
-    write('Carta extraida: '), writeln(Carta),
+    cartaObtenerDescripcion(Carta, Descripcion),
+    write('Carta extraida: '), writeln(Descripcion),
     call(Accion, JuegoA2, Argumento, JuegoA3), %Accion de turno (como hipotecar una prop)
     juegoAvanzarTurno(JuegoA3, JuegoActualizado), !. 
+
 %Caso 4: Cae en una propiedad
 juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento, JuegoActualizado):-
     juegoLanzarDados(Juego, SeedDados, NSeedDados, Dados),
@@ -510,6 +591,29 @@ juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento, JuegoActualizad
     juegoPagarRenta(JuegoA1, CasillaCaida, JuegoA2), %pagar renta si corresponde
     call(Accion, JuegoA2, Argumento, JuegoA3), %accion de turno (posible compra de propiedad)
     juegoAvanzarTurno(JuegoA3, JuegoActualizado), !.
+
+% Descripcion: finaliza el juego si solo queda un jugador no en bancarrota
+% Dominio: Juego (TDA juego) X JuegoActualizado(TDA juego)
+% Recorrido: juego
+juegoTerminar(Juego, JuegoActualizado) :-
+    juegoObtenerJugadores(Juego, Jugadores),
+    hayUnGanador(Jugadores, Ganador),
+    \+ jugadorEstaEnBancarrota(Ganador),
+    write('----- Juego terminado -----\n'),
+    juegoSetTurnoActual(Juego, -1, JuegoActualizado).
+
+% Retorna ganador si solo hay un jugador no en bancarrota
+hayUnGanador(Jugadores, Ganador) :-
+    excluirBancarrota(Jugadores, NoBancarrota),
+    NoBancarrota = [Ganador], !.
+%Excluye jugadores en bancarrota con el fin de llegar al ganador
+excluirBancarrota([], []).
+excluirBancarrota([J|Resto], [J|Filtrados]) :-
+    \+ jugadorEstaEnBancarrota(J),
+    excluirBancarrota(Resto, Filtrados).
+excluirBancarrota([J|Resto], Filtrados) :-
+    jugadorEstaEnBancarrota(J),
+    excluirBancarrota(Resto, Filtrados).
 
 % ------Acciones de cartas (tipo suerte) --------
 % Descripcion: Mueve al jugador actual hasta la salida
@@ -531,6 +635,31 @@ irACarcel(Juego, JuegoActualizado):-
     jugadorSetEstaenCarcel(JugadorCarcel, true, JugadorActualizado),
     juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).
 
+% Descripcion: Usa una carta para salir de la carcel el jugador actual
+% Dominio: Juego (TDA juego)  X JuegoActualizado (TDA juego)
+% Recorrido : juego
+cartaSalirCarcel(Juego, Juego):-
+    juegoObtenerJugadorActual(Juego, JugadorActual),
+    jugadorObtenerCartasCarcel(JugadorActual, CartasCarcel),
+    CartasCarcel = 0, !.
+cartaSalirCarcel(Juego, JuegoActualizado):-
+    juegoObtenerJugadorActual(Juego, JugadorActual),
+    jugadorObtenerCartasCarcel(JugadorActual, CartasCarcel),
+    CartasCarcel > 0, CartasCarcelAct is CartasCarcel - 1,
+    jugadorSetEstaenCarcel(JugadorActual, false, JugadorA1),
+    jugadorSetCartasCarcel(JugadorA1, CartasCarcelAct, JugadorActualizado),
+    juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado), !.
+
+% Descripcion: Le da una carta para salir de la carcel al jugador actual
+% Dominio: Juego (TDA juego)  X JuegoActualizado (TDA juego)
+% Recorrido : juego
+obtenerCartaSalirCarcel(Juego, JuegoActualizado):-
+    juegoObtenerJugadorActual(Juego, JugadorActual),
+    jugadorObtenerCartasCarcel(JugadorActual, CartasCarcel),
+    CartasCarcelAct is CartasCarcel + 1,
+    jugadorSetCartasCarcel(JugadorActual, CartasCarcelAct, JugadorActualizado),
+    juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).
+
 % Descripcion: Agrega 20000 de dinero al jugador actual
 % Dominio: Juego (TDA juego)  X JuegoActualizado (TDA juego)
 % Recorrido : juego
@@ -540,7 +669,6 @@ ganarKino(Juego, JuegoActualizado):-
     DineroActualizado is Dinero + 20000,
     jugadorSetDinero(Jugador, DineroActualizado, JugadorActualizado),
     juegoActualizarJugador(Juego, JugadorActualizado, JuegoActualizado).
-
 
 %----Comunidad-----
 % Descripcion: Paga el 10% de su dinero al banco
@@ -567,3 +695,15 @@ cambiarImpuesto(Juego, JuegoActualizado):-
     juegoObtenerTasaImpuesto(Juego, TasaActual),
     TasaActual = 5, TasaActualizada is 10,
     juegoSetTasaImpuesto(Juego, TasaActualizada, JuegoActualizado).    
+
+% Descripcion: Libera a todos los jugadores de la carcel
+% Dominio: Juego (TDA juego)  X JuegoActualizado (TDA juego)
+% Recorrido : juego
+liberarPrisioneros(Juego, JuegoActualizado):-
+    juegoObtenerJugadores(Juego, Jugadores),
+    liberarPresosAux(Jugadores, JugadoresActualizados),
+    juegoActualizarJugadores(Juego, JugadoresActualizados, JuegoActualizado).
+liberarPresosAux([], []).
+liberarPresosAux([JActual|JResto], [JALibre | RestoLibre]):-
+    jugadorSetEstaenCarcel(JActual, false, JALibre),
+    liberarPresosAux(JResto, RestoLibre).

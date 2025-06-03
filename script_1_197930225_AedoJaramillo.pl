@@ -9,10 +9,10 @@ prueba :-
     % Crear jugadores
     %  dinero = 0 / posicion = 0 / carrcel = false / 1 carta para salir de carcel
 
-    jugador(1, 'Tonino', 0, [], 0, false, 1, J1), 
+    jugador(1, 'Meli', 0, [], 0, false, 1, J1), 
     write('Jugador creado: '), writeln(J1),
 
-    jugador(2, 'Meli', 0, [], 0, false, 1, J2),
+    jugador(2, 'Tonino', 0, [], 0, false, 1, J2),
     write('Jugador creado: '), writeln(J2),
 
     % Crear propiedades
@@ -55,7 +55,7 @@ prueba :-
     write('Ultima posicion en el tablero: '), writeln(UltimaPos), 
 
     % Crear un juego
-    juego([], [], 25000, 2, 2, 10, 8, 1, G0), 
+    juego([], [], 25000, 2, 0, 10, 8, 1, G0), 
     write('Juego creado: '), writeln(G0),
     (esJuego(G0) -> writeln('Es un juego valido.') ; writeln('No es un juego valido')),
 
@@ -64,8 +64,11 @@ prueba :-
     juegoAgregarJugador(G1, J2, G2),
 
     % Agregar tablero
-    juegoAgregarTablero(G2, T4, G3),
-    write('Jugadores y tablero agregados: '), writeln(G3),
+    juegoAgregarTablero(G2, T4, G3Pre),
+    write('Jugadores y tablero agregados: '), writeln(G3Pre),
+
+    % Comienza el juego
+    juegoComenzar(G3Pre, G3),
 
     % Obtener jugador de turno
     juegoObtenerJugadorActual(G3, JugadorActual),

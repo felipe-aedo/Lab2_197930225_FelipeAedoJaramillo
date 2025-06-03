@@ -4,6 +4,7 @@
     propiedad/9,
     esPropiedad/1,
     propiedadObtenerId/2,
+    propiedadObtenerNombre/2,
     propiedadObtenerPrecio/2,
     propiedadObtenerRenta/2,
     propiedadObtenerDueno/2,
@@ -42,6 +43,12 @@ esPropiedad(Propiedad):-
 % Recorrido: integer
 propiedadObtenerId(Propiedad, ID):-
     Propiedad = [ID,_,_,_,_,_,_,_].
+
+% Descripcion: Obtiene nombre de la propiedad
+% Dominio: Propiedad (TDA propiedad) X ID (integer)
+% Recorrido: integer
+propiedadObtenerNombre(Propiedad, Nombre):-
+    Propiedad = [_,Nombre,_,_,_,_,_,_].
 
 % Descripcion: Obtiene precio de la propiedad
 % Dominio: Propiedad (TDA propiedad) X Precio (integer)

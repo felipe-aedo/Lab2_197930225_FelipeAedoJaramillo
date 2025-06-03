@@ -9,6 +9,7 @@
     jugadorObtenerPropiedades/2,
     jugadorObtenerPosicion/2,
     jugadorEstaenCarcel/2,
+    jugadorUsarCartaCarcel/2,
     jugadorObtenerCartasCarcel/2,
     jugadorEstaEnBancarrota/1,
     jugadorSetDinero/3,
@@ -89,7 +90,6 @@ jugadorEstaenCarcel(Jugador, EstaenCarcel):-
 jugadorObtenerCartasCarcel(Jugador, CartasCarcel):-
     Jugador = [_, _, _, _, _, _, CartasCarcel].
 
-
 %----SETTERS Y MODIFIERS----
 
 % Descripcion: Modifica la cantidad de dinero que posee el jugador
@@ -134,6 +134,16 @@ jugadorSetCartasCarcel(Jugador, NuevasCartasCarcel, JugadorActualizado):-
     Jugador = [ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, _],
     jugador(ID, Nombre, Dinero, Propiedades, Posicion, EstaenCarcel, NuevasCartasCarcel, JugadorActualizado).
 
+% Descripcion: Modifica la cantidad de cartas para ser desencarcelado a la par que quita el true de encarcelado
+% Dominio: Jugador (TDA jugador) X JugadorActualizado (TDA jugador)
+% Recorrido: jugador
+jugadorUsarCartaCarcel(Jugador, JugadorActualizado):-
+    jugadorObtenerCartasCarcel(Jugador, CartasCarcel), CartasCarcel > 0, 
+    NuevasCartasCarcel is CartasCarcel - 1,
+    jugadorSetCartasCarcel(Jugador, NuevasCartasCarcel, JugadorA1),
+    jugadorSetEstaenCarcel(JugadorA1, false, JugadorActualizado), !.
+jugadorUsarCartaCarcel(Jugador, Jugador):- writeln('Fallo al usar carta carcel.'), !.
+
 % Descripcion: Corrige la posicion de un jugador si se sale del tablero
 % Dominio: Jugador (TDA jugador) X UltimaPosicion (integer) X JugadorActualizado (TDA jugador)
 % Recorrido: jugador
@@ -152,8 +162,9 @@ jugadorCorregirPosicion(Jugador, UltimaPosicion, Jugador):-
 % Recorrido: jugador
 jugadorComprarPropiedad(Jugador, Propiedad, JugadorActualizado):-
     jugadorObtenerDinero(Jugador, Dinero), propiedadObtenerPrecio(Propiedad, Precio), Dinero >= Precio,
-    propiedadObtenerDueno(Propiedad, Dueno), Dueno = [], DineroAct is Dinero - Precio, propiedadObtenerId(Propiedad, ID),
-    jugadorSetDinero(Jugador, DineroAct, JugadorPaga), jugadorAgregarPropiedad(JugadorPaga, ID, JugadorActualizado), !.
+    propiedadObtenerDueno(Propiedad, Dueno), Dueno = [], 
+    propiedadObtenerId(Propiedad, ID),
+    jugadorAgregarPropiedad(Jugador, ID, JugadorActualizado), !.
 jugadorComprarPropiedad(Jugador, Propiedad, Jugador):- %retorna sin cambios si no pudo comprar
     jugadorObtenerDinero(Jugador, Dinero), propiedadObtenerPrecio(Propiedad, Precio), propiedadObtenerDueno(Propiedad, Dueno),
     (Dueno \= [] ; Dinero < Precio), !.

@@ -39,9 +39,13 @@ prueba_mario :-
     carta(3, suerte, 'Has ganado la loteria! (Banco paga 5.000).', ganarKino, C3),
     carta(4, suerte, 'Obtiene carta para salir del calabozo', obtenerCartaSalirCarcel, C4),
     carta(5, suerte, 'Paga multa de 400', multaSuerte, C5),
-    carta(6, comunidad, 'Bowser cambia la tasa de impuestos del Reino', cambiarImpuesto, C6),
-    carta(7, comunidad, 'Paga el 10% de tus monedas en impuestos del Reino', pagarImpuesto, C7),
-    carta(8, comunidad, 'Kamek ha liberado a todos los prisioneros!', liberarPrisioneros, C8),
+    carta(6, suerte, 'Bloque oculto! Duplica sus monedas', duplicaDinero, C6),
+    carta(7, comunidad, 'Bowser cambia la tasa de impuestos del Reino', cambiarImpuesto, C7),
+    carta(8, comunidad, 'Paga el 10% de tus monedas en impuestos del Reino', pagarImpuesto, C8),
+    carta(9, comunidad, 'Kamek ha liberado a todos los prisioneros!', liberarPrisioneros, C9),
+    carta(10, comunidad, 'Recibes 800 monedas', bonoDinero, C10),
+    carta(11, comunidad, 'El impuesto ha cambiado drasticamente', crisisEconomica, C11),
+    carta(12, comunidad, 'Todos reciben 400 moendas', bonoEquitativo, C12),
     write('Cartas creadas.\n'),
 
     % Crear tablero
@@ -65,21 +69,22 @@ prueba_mario :-
         [suerte, 19],
         [comunidad, 22]], T2),
 
-    tableroAgregarCartas(T2, [C1,C2,C3,C4,C5], [C6,C7,C8], T3),
+    tableroAgregarCartas(T2, [C1,C2,C3,C4,C5,C6], [C6,C7,C8,C9,C10,C11,C12], T3),
     write('Tablero completado: \n'), writeln(T3),
 
     tableroObtenerUltimaPosicion(T3, UltimaPos),
-    write('Ultima posicion en el tablero: '), writeln(UltimaPos),
+    write('Ultima posicion en el tablero: '), writeln(UltimaPos), write('\n'),
 
     % Crear juego
-    juego([], [], 35000, 3, 1, 10, 9, 1, G0),
+    juego([], [], 35000, 3, 0, 10, 9, 1, G0),
     juegoAgregarJugador(G0, J1, G1),
     juegoAgregarJugador(G1, J2, G2),
     juegoAgregarJugador(G2, J3, G3),
 
-    juegoAgregarTablero(G3, T3, G4),
+    juegoAgregarTablero(G3, T3, G4Pre),
 
-    write('Juego listo para comenzar: \n'), writeln(G4), write('\n'),
+    % Comienza el juego
+    juegoComenzar(G4Pre, G4),
 
     % Obtener jugador de turno
     juegoObtenerJugadorActual(G4, JugadorActual),
@@ -109,7 +114,7 @@ prueba_mario :-
     write('Juego tras turno 5(Luigi): \n'), writeln(G9), write('\n'),
 
     % Jugar turno 6
-    juegoJugarTurno(G9, Seeds5, Seeds6, juegoAccionComprarPropiedad, _, G10),
+    juegoJugarTurno(G9, Seeds5, Seeds6, cartaSalirCarcel, _, G10),
     write('Juego tras turno 6 (Peach): \n'), writeln(G10), write('\n'),
 
     % Jugar turno 7
@@ -129,7 +134,7 @@ prueba_mario :-
     write('Juego tras turno 10(Mario): \n'), writeln(G14), write('\n'),
 
     % Jugar turno 11
-    juegoJugarTurno(G14, Seeds10, Seeds11, juegoConstruirCasa, 11, G15),
+    juegoJugarTurno(G14, Seeds10, Seeds11, juegoAccionComprarPropiedad, _, G15),
     write('Juego tras turno 11(Luigi): \n'), writeln(G15), write('\n'),
 
     % Jugar turno 12
@@ -141,7 +146,7 @@ prueba_mario :-
     write('Juego tras turno 13(Mario): \n'), writeln(G17), write('\n'),
 
     % Jugar turno 14
-    juegoJugarTurno(G17, Seeds13, Seeds14, juegoAccionComprarPropiedad, _, G18),
+    juegoJugarTurno(G17, Seeds13, Seeds14, cartaSalirCarcel, _, G18),
     write('Juego tras turno 14(Luigi): \n'), writeln(G18), write('\n'),
 
     % Jugar turno 15
@@ -153,7 +158,7 @@ prueba_mario :-
     write('Juego tras turno 16(Mario): \n'), writeln(G20), write('\n'),
 
     % Jugar turno 17
-    juegoJugarTurno(G20, Seeds16, Seeds17, cartaSalirCarcel, _, G21),
+    juegoJugarTurno(G20, Seeds16, Seeds17, juegoAccionComprarPropiedad, _, G21),
     write('Juego tras turno 17(Luigi): \n'), writeln(G21), write('\n'),
 
     % Jugar turno 18
@@ -165,7 +170,7 @@ prueba_mario :-
     write('Juego tras turno 19(Mario): \n'), writeln(G23), write('\n'),
 
     % Jugar turno 20
-    juegoJugarTurno(G23, Seeds19, Seeds20, cartaSalirCarcel, _, G24),
+    juegoJugarTurno(G23, Seeds19, Seeds20, juegoAccionComprarPropiedad, _, G24),
     write('Juego tras turno 20(Luigi): \n'), writeln(G24), write('\n'),
 
     % Jugar turno 21
@@ -181,11 +186,19 @@ prueba_mario :-
     write('Juego tras turno 23(Luigi): \n'), writeln(G27), write('\n'),
 
     % Jugar turno 24
-    juegoJugarTurno(G27, Seeds23, Seeds24, cartaSalirCarcel, _, G28),
+    juegoJugarTurno(G27, Seeds23, Seeds24, juegoConstruirCasa, 2, G28),
     write('Juego tras turno 24 (Peach): \n'), writeln(G28), write('\n'),
     
     % Jugar turno 25
-    juegoJugarTurno(G28, Seeds24, _, juegoAccionComprarPropiedad, _, G29),
-    write('Juego tras turno 25(Mario): \n'), writeln(G29), write('\n').
+    juegoJugarTurno(G28, Seeds24, Seeds25, juegoAccionComprarPropiedad, _, G29),
+    write('Juego tras turno 25(Mario): \n'), writeln(G29), write('\n'),
+
+    % Jugar turno 26
+    juegoJugarTurno(G29, Seeds25, _, juegoAccionComprarPropiedad, _, G30),
+    write('Juego tras turno 26(Luigi): \n'), writeln(G30), write('\n'),
+
+    % Jugar turno 27
+    juegoJugarTurno(G30, [3,4,4], _, juegoAccionComprarPropiedad, _, G31),
+    write('Juego tras turno 27 (Peach): \n'), writeln(G31), write('\n').
 
 :- initialization(prueba_mario).

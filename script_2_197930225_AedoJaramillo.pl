@@ -20,16 +20,16 @@ prueba_mario :-
     propiedad(3, 'Isla Delfino', 900, 225, [], 0, false, false, P3),
     propiedad(4, 'Mansion Boo', 1000, 260, [], 0, false, false, P4),
     propiedad(5, 'Bosque ilusion', 1200, 350, [], 0, false, false, P5),
-    propiedad(6, 'Fortaleza koopa', 1800, 500, [], 0, false, false, P6),
+    propiedad(6, 'Fortaleza koopa', 1300, 380, [], 0, false, false, P6),
     propiedad(7, 'Puente de queso', 600, 150, [], 0, false, false, P7),
     propiedad(8, 'Monte Galleta', 700, 180, [], 0, false, false, P8),
     propiedad(9, 'Cupula Vainilla', 800, 200, [], 0, false, false, P9),
     propiedad(10, 'Fortaleza de Whomp', 950, 240, [], 0, false, false, P10),
     propiedad(11, 'Lago de soda', 1100, 300, [], 0, false, false, P11),
-    propiedad(12, 'Isla Chocolate', 1400, 400, [], 0, false, false, P12),
-    propiedad(13, 'Camino Estelar', 1500, 420, [], 0, false, false, P13),
-    propiedad(14, 'Valle de Bowser', 1600, 450, [], 0, false, false, P14),
-    propiedad(15, 'Castillo de Bowser', 2000, 600, [], 0, false, false, P15),
+    propiedad(12, 'Isla Chocolate', 1400, 420, [], 0, false, false, P12),
+    propiedad(13, 'Camino Estelar', 1500, 480, [], 0, false, false, P13),
+    propiedad(14, 'Valle de Bowser', 1600, 500, [], 0, false, false, P14),
+    propiedad(15, 'Castillo de Bowser', 2000, 700, [], 0, false, false, P15),
 
     write('Propiedades creadas.\n'),
 
@@ -40,12 +40,22 @@ prueba_mario :-
     carta(4, suerte, 'Obtiene carta para salir del calabozo', obtenerCartaSalirCarcel, C4),
     carta(5, suerte, 'Paga multa de 400', multaSuerte, C5),
     carta(6, suerte, 'Bloque oculto! Duplica sus monedas', duplicaDinero, C6),
-    carta(7, comunidad, 'Bowser cambia la tasa de impuestos del Reino', cambiarImpuesto, C7),
-    carta(8, comunidad, 'Paga el 10% de tus monedas en impuestos del Reino', pagarImpuesto, C8),
-    carta(9, comunidad, 'Kamek ha liberado a todos los prisioneros!', liberarPrisioneros, C9),
-    carta(10, comunidad, 'Recibes 800 monedas', bonoDinero, C10),
-    carta(11, comunidad, 'El impuesto ha cambiado drasticamente', crisisEconomica, C11),
-    carta(12, comunidad, 'Todos reciben 400 moendas', bonoEquitativo, C12),
+    carta(7, suerte, 'Toad te ayuda a liberar una hipoteca!', liberarHipoteca, C7),
+    carta(8, suerte, 'Regalo sorpresa! Recibes un hotel para una propiedad aleatoria.', regalarHotel, C8),
+    carta(9, suerte, 'Terremoto! Pierdes todas las casas de tu primera propiedad.', eventoTerremoto, C9),
+    carta(10, suerte, 'Día de suerte! Todos los jugadores te dan 200 monedas.', diaDeSuerte, C10),
+
+    carta(11, comunidad, 'Bowser cambia la tasa de impuestos del Reino', cambiarImpuesto, C11),
+    carta(12, comunidad, 'Paga el 10% de tus monedas en impuestos del Reino', pagarImpuesto, C12),
+    carta(13, comunidad, 'Kamek ha liberado a todos los prisioneros!', liberarPrisioneros, C13),
+    carta(14, comunidad, 'Recibes 800 monedas', bonoDinero, C14),
+    carta(15, comunidad, 'El impuesto ha cambiado drasticamente', crisisEconomica, C15),
+    carta(16, comunidad, 'Todos reciben 400 monedas', bonoEquitativo, C16),
+    carta(17, comunidad, 'Obtienes una casa gratis.', regalarCasa, C17),
+    carta(18, comunidad, 'Impuesto global! Cada jugador paga 100 monedas.', impuestoGlobal, C18),
+    carta(19, comunidad, 'Wario destruye una de tus casas!.', eventoDemolicion, C19),
+    carta(20, comunidad, 'Has sido incriminado! El jugador más rico va al calabozo.', incriminarJugador, C20),
+
     write('Cartas creadas.\n'),
 
     % Crear tablero
@@ -69,7 +79,8 @@ prueba_mario :-
         [suerte, 19],
         [comunidad, 22]], T2),
 
-    tableroAgregarCartas(T2, [C1,C2,C3,C4,C5,C6], [C6,C7,C8,C9,C10,C11,C12], T3),
+    tableroAgregarCartas(T2, [C1,C2,C3,C4,C5,C6,C7,C8,C9,C10], 
+                             [C11,C12,C13,C14,C15,C16,C17,C18,C19,C20], T3),
     write('Tablero completado: \n'), writeln(T3),
 
     tableroObtenerUltimaPosicion(T3, UltimaPos),
@@ -114,7 +125,7 @@ prueba_mario :-
     write('Juego tras turno 5(Luigi): \n'), writeln(G9), write('\n'),
 
     % Jugar turno 6
-    juegoJugarTurno(G9, Seeds5, Seeds6, cartaSalirCarcel, _, G10),
+    juegoJugarTurno(G9, Seeds5, Seeds6, juegoAccionComprarPropiedad, _, G10),
     write('Juego tras turno 6 (Peach): \n'), writeln(G10), write('\n'),
 
     % Jugar turno 7
@@ -122,7 +133,7 @@ prueba_mario :-
     write('Juego tras turno 7(Mario): \n'), writeln(G11), write('\n'),
 
     % Jugar turno 8
-    juegoJugarTurno(G11, Seeds7, Seeds8, juegoAccionComprarPropiedad, _, G12),
+    juegoJugarTurno(G11, Seeds7, Seeds8, cartaSalirCarcel, _, G12),
     write('Juego tras turno 8(Luigi): \n'), writeln(G12), write('\n'),
 
     % Jugar turno 9
@@ -138,7 +149,7 @@ prueba_mario :-
     write('Juego tras turno 11(Luigi): \n'), writeln(G15), write('\n'),
 
     % Jugar turno 12
-    juegoJugarTurno(G15, Seeds11, Seeds12, juegoAccionComprarPropiedad, _, G16),
+    juegoJugarTurno(G15, Seeds11, Seeds12, juegoConstruirCasa, 7, G16),
     write('Juego tras turno 12 (Peach): \n'), writeln(G16), write('\n'),
     
     % Jugar turno 13
@@ -146,15 +157,15 @@ prueba_mario :-
     write('Juego tras turno 13(Mario): \n'), writeln(G17), write('\n'),
 
     % Jugar turno 14
-    juegoJugarTurno(G17, Seeds13, Seeds14, cartaSalirCarcel, _, G18),
+    juegoJugarTurno(G17, Seeds13, Seeds14, juegoAccionComprarPropiedad, _, G18),
     write('Juego tras turno 14(Luigi): \n'), writeln(G18), write('\n'),
 
     % Jugar turno 15
-    juegoJugarTurno(G18, Seeds14, Seeds15, juegoAccionComprarPropiedad, _, G19),
+    juegoJugarTurno(G18, Seeds14, Seeds15, juegoConstruirCasa, 7, G19),
     write('Juego tras turno 15 (Peach): \n'), writeln(G19), write('\n'),
     
     % Jugar turno 16
-    juegoJugarTurno(G19, Seeds15, Seeds16, juegoAccionComprarPropiedad, _, G20),
+    juegoJugarTurno(G19, Seeds15, Seeds16, juegoConstruirCasa, 5, G20),
     write('Juego tras turno 16(Mario): \n'), writeln(G20), write('\n'),
 
     % Jugar turno 17
@@ -162,7 +173,7 @@ prueba_mario :-
     write('Juego tras turno 17(Luigi): \n'), writeln(G21), write('\n'),
 
     % Jugar turno 18
-    juegoJugarTurno(G21, Seeds17, Seeds18, juegoAccionComprarPropiedad, _, G22),
+    juegoJugarTurno(G21, Seeds17, Seeds18, juegoConstruirCasa, 7, G22),
     write('Juego tras turno 18 (Peach): \n'), writeln(G22), write('\n'),
     
     % Jugar turno 19
@@ -182,11 +193,11 @@ prueba_mario :-
     write('Juego tras turno 22(Mario): \n'), writeln(G26), write('\n'),
 
     % Jugar turno 23
-    juegoJugarTurno(G26, Seeds22, Seeds23, juegoAccionComprarPropiedad, _, G27),
+    juegoJugarTurno(G26, Seeds22, Seeds23, juegoConstruirCasa, 6, G27),
     write('Juego tras turno 23(Luigi): \n'), writeln(G27), write('\n'),
 
     % Jugar turno 24
-    juegoJugarTurno(G27, Seeds23, Seeds24, juegoConstruirCasa, 2, G28),
+    juegoJugarTurno(G27, Seeds23, Seeds24, juegoHipotecarPropiedad, 7, G28),
     write('Juego tras turno 24 (Peach): \n'), writeln(G28), write('\n'),
     
     % Jugar turno 25
@@ -194,11 +205,11 @@ prueba_mario :-
     write('Juego tras turno 25(Mario): \n'), writeln(G29), write('\n'),
 
     % Jugar turno 26
-    juegoJugarTurno(G29, Seeds25, _, juegoAccionComprarPropiedad, _, G30),
+    juegoJugarTurno(G29, Seeds25, _, juegoConstruirCasa, 6, G30),
     write('Juego tras turno 26(Luigi): \n'), writeln(G30), write('\n'),
 
     % Jugar turno 27
-    juegoJugarTurno(G30, [3,4,4], _, juegoAccionComprarPropiedad, _, G31),
+    juegoJugarTurno(G30, [2,4,4], _, juegoAccionComprarPropiedad, _, G31),
     write('Juego tras turno 27 (Peach): \n'), writeln(G31), write('\n').
 
 :- initialization(prueba_mario).

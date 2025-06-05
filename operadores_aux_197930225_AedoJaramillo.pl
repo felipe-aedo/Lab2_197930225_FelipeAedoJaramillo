@@ -9,7 +9,6 @@ boolean(false).
 max(X, Y, X) :- X >= Y.
 max(X, Y, Y) :- Y > X.
 
-
 %comprueba si el elemento pertenece a la lista
 % dominio: elemento, lista de elementos
 myMember(X,[X|_]):- !.

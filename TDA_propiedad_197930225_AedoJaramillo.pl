@@ -119,5 +119,6 @@ propiedadHipotecar(Propiedad, PropiedadActualizada):-
 % Dominio: PropiedadIN (TDA propiedad) X PropiedadOut (TDA propiedad)
 % Recorrido: propiedad
 propiedadDeshipotecar(Propiedad, PropiedadActualizada):-
-    Propiedad = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstadoHipoteca], EstadoHipoteca \= false,
-    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, false, PropiedadActualizada).
+    Propiedad = [ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, EstadoHipoteca], EstadoHipoteca = true,
+    propiedad(ID, Nombre, Precio, Renta, Dueno, Casas, EsHotel, false, PropiedadActualizada), !.
+propiedadDeshipotecar(Prop, Prop):- !.

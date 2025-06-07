@@ -87,7 +87,7 @@ prueba_mario :-
     write('Ultima posicion en el tablero: '), writeln(UltimaPos), write('\n'),
 
     % Crear juego
-    juego([], [], 35000, 3, 0, 10, 9, 1, G0),
+    juego([], [], 35000, 3, 0, 10, 3, 1, G0),
     juegoAgregarJugador(G0, J1, G1),
     juegoAgregarJugador(G1, J2, G2),
     juegoAgregarJugador(G2, J3, G3),
@@ -161,11 +161,11 @@ prueba_mario :-
     write('Juego tras turno 14(Luigi): \n'), writeln(G18), write('\n'),
 
     % Jugar turno 15
-    juegoJugarTurno(G18, Seeds14, Seeds15, juegoConstruirCasa, 7, G19),
+    juegoJugarTurno(G18, Seeds14, Seeds15, juegoConstruirCasa, 7, G19), %construir casa (falla)
     write('Juego tras turno 15 (Peach): \n'), writeln(G19), write('\n'),
     
     % Jugar turno 16
-    juegoJugarTurno(G19, Seeds15, Seeds16, juegoConstruirCasa, 5, G20),
+    juegoJugarTurno(G19, Seeds15, Seeds16, juegoConstruirCasa, 5, G20), %construir casa
     write('Juego tras turno 16(Mario): \n'), writeln(G20), write('\n'),
 
     % Jugar turno 17
@@ -173,7 +173,7 @@ prueba_mario :-
     write('Juego tras turno 17(Luigi): \n'), writeln(G21), write('\n'),
 
     % Jugar turno 18
-    juegoJugarTurno(G21, Seeds17, Seeds18, juegoConstruirCasa, 7, G22),
+    juegoJugarTurno(G21, Seeds17, Seeds18, juegoConstruirCasa, 7, G22), %construir casa
     write('Juego tras turno 18 (Peach): \n'), writeln(G22), write('\n'),
     
     % Jugar turno 19
@@ -185,7 +185,7 @@ prueba_mario :-
     write('Juego tras turno 20(Luigi): \n'), writeln(G24), write('\n'),
 
     % Jugar turno 21
-    juegoJugarTurno(G24, Seeds20, Seeds21, juegoAccionComprarPropiedad, _, G25),
+    juegoJugarTurno(G24, Seeds20, Seeds21, juegoConstruirHotel, 7, G25), %construccion de hotel
     write('Juego tras turno 21 (Peach): \n'), writeln(G25), write('\n'),
     
     % Jugar turno 22

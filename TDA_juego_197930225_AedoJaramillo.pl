@@ -11,6 +11,7 @@
     juegoObtenerTurnoActual/2,
     juegoObtenerJugadorActual/2,
     juegoObtenerPosicion/3,
+    juegoObtenerPropiedad/3,
     juegoAgregarJugador/3,
     juegoAgregarTablero/3,
     juegoActualizarJugadores/3,
@@ -302,7 +303,7 @@ juegoConstruirCasa(Juego, IdPropiedad, JuegoActualizado):-
     juegoCobrarJugador(Juego, Jugador, Precio, Juego1),
     juegoActualizarPropiedad(Juego1, PropiedadActualizada, JuegoActualizado), 
     write('Casa construida en propiedad '), writeln(IdPropiedad), !.
-juegoConstruirCasa(Juego, _, Juego):- !. %no es posible construir
+juegoConstruirCasa(Juego, _, Juego):- writeln('No es posible construir casa'), !. %no es posible construir
 
 % Descripcion: Construye un hotel para la propiedad del jugador actual. actualiza propiedad
 % Dom: Juego (TDA juego) X IdPropiedad (integer) X JuegoActualizado (TDA juego)
@@ -318,8 +319,8 @@ juegoConstruirHotel(Juego, IdPropiedad, JuegoActualizado):-
     propiedadSetHotel(Propiedad, true, PropiedadConHotel),
     propiedadSetCasas(PropiedadConHotel, 0, PropiedadActualizada),
     juegoActualizarPropiedad(Juego, PropiedadActualizada, JuegoActualizado), 
-    writeln('Hotel construido en propiedad '), writeln(IdPropiedad) ,!.
-juegoConstruirHotel(Juego, _, Juego):- !. % no es posible construir
+    write('Hotel construido en propiedad '), writeln(IdPropiedad) ,!.
+juegoConstruirHotel(Juego, _, Juego):- writeln('No es posible construir el Hotel'), !. % no es posible construir
 
 
 % Descripcion: Hipoteca una propiedad en el juego
@@ -507,11 +508,21 @@ juegoImpuestoPropiedades(Juego, JuegoActualizado) :-
     juegoObtenerTasaImpuesto(Juego, TasaImpuesto),
     Cobro is (TasaImpuesto * Renta) // 100,
     juegoCobrarJugador(Juego, Jugador, Cobro, JuegoActualizado).
-    
+
+%Imprime informacion
+%imprimirImpuestos/2 recibe una posicion a verificar si supera la posicion maxima
 imprimirImpuestos(PosVerificar, UltimaPosicion):-
     PosVerificar > UltimaPosicion, writeln('Impuestos cobrados').
 imprimirImpuestos(PosVerificar, UltimaPosicion):-
     PosVerificar =< UltimaPosicion.
+
+%Imprime informacion
+%imprimirJugadaPerfecta/2 recibe la jugada y el caso (estaba en carcel o no)
+imprimirJugadaPerfecta(Dados, 1):-
+    jugadaPerfecta(Dados), writeln('Jugada perfecta! bonus de 160 dinero (Huye de la carcel)').
+imprimirJugadaPerfecta(Dados, 0):-
+    jugadaPerfecta(Dados), writeln('Jugada perfecta! bonus de 160 dinero').
+imprimirJugadaPerfecta(_, _).
 
 % Descripcion: Obtiene una carta aleatoria de un tipo especificado
 % Dominio: Juego (TDA juego) X TipoCarta (Atom) X Seed (integer) X NuevaSeed (integer) X Carta (TDA carta)
@@ -599,7 +610,7 @@ juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento, JuegoActualizad
     juegoObtenerJugadorActual(Juego, JugadorActual),
     jugadorEstaenCarcel(JugadorActual, Estado), Estado = true,
     write('Dados lanzados: '), writeln(Dados),
-    juegoJugadaPerfecta(Juego, JugadorActual, Dados, JuegoA1),
+    juegoJugadaPerfecta(Juego, JugadorActual, Dados, JuegoA1), imprimirJugadaPerfecta(Dados, 1),
     call(Accion, JuegoA1, Argumento, JuegoA2), %Ejecutar accion de input
     juegoAvanzarTurno(JuegoA2, JuegoActualizado), !.
 %Caso 1: Cae en salida
@@ -613,7 +624,7 @@ juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento, JuegoActualizad
     juegoObtenerCasillaActual(JuegoA1, CasillaCaida),
     CasillaCaida = salida, %cae en la salida
     write('Dados lanzados: '), writeln(Dados),
-    imprimirImpuestos(PosVerificar, UltimaPosicion),
+    imprimirImpuestos(PosVerificar, UltimaPosicion), imprimirJugadaPerfecta(Dados, 0),
     call(Accion, JuegoA1, Argumento, JuegoA2), %Ejecutar accion de input (como hipotecar alguna propiedad)
     juegoAvanzarTurno(JuegoA2, JuegoActualizado), !.
 
@@ -628,7 +639,7 @@ juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento,JuegoActualizado
     juegoObtenerCasillaActual(JuegoA1, CasillaCaida),
     CasillaCaida = carcel,
     write('Dados lanzados: '), writeln(Dados),
-    imprimirImpuestos(PosVerificar, UltimaPosicion),
+    imprimirImpuestos(PosVerificar, UltimaPosicion), imprimirJugadaPerfecta(Dados, 0),
     writeln('De visita en la carcel'),
     call(Accion, JuegoA1, Argumento, JuegoA2),
     juegoAvanzarTurno(JuegoA2, JuegoActualizado), !.
@@ -644,7 +655,7 @@ juegoJugarTurno(Juego, [S1|TS], NSeedDados, Accion, Argumento, JuegoActualizado)
     juegoObtenerCasillaActual(JuegoA1, CasillaCaida),
     (CasillaCaida = suerte ; CasillaCaida = comunidad), %cae en carta
     write('Dados lanzados: '), writeln(Dados),
-    imprimirImpuestos(PosVerificar, UltimaPosicion),
+    imprimirImpuestos(PosVerificar, UltimaPosicion), imprimirJugadaPerfecta(Dados,0 ),
     juegoExtraerCarta(JuegoA1, CasillaCaida, [S1], _, JuegoA2, Carta), %ejecutar carta
     cartaObtenerDescripcion(Carta, Descripcion),
     write('Carta extraida: '), writeln(Descripcion),
@@ -662,7 +673,7 @@ juegoJugarTurno(Juego, SeedDados, NSeedDados, Accion, Argumento, JuegoActualizad
     juegoObtenerCasillaActual(JuegoA1, CasillaCaida),
     esPropiedad(CasillaCaida),
     write('Dados lanzados: '), writeln(Dados),
-    imprimirImpuestos(PosVerificar, UltimaPosicion),
+    imprimirImpuestos(PosVerificar, UltimaPosicion), imprimirJugadaPerfecta(Dados, 0),
     juegoPagarRenta(JuegoA1, CasillaCaida, JuegoA2), %pagar renta si corresponde
     call(Accion, JuegoA2, Argumento, JuegoA3), %accion de turno (posible compra de propiedad)
     juegoAvanzarTurno(JuegoA3, JuegoActualizado), !.
@@ -684,7 +695,9 @@ juegoTerminar(Juego, JuegoActualizado) :-
     juegoObtenerJugadores(Juego, Jugadores),
     hayUnGanador(Jugadores, Ganador),
     \+ jugadorEstaEnBancarrota(Ganador),
+    jugadorObtenerNombre(Ganador, NombreGanador),
     write('----- Juego terminado -----\n'),
+    write('----- Ganador: '), write(NombreGanador), writeln(' -----'),
     juegoSetTurnoActual(Juego, -1, JuegoActualizado).
 
 % Retorna ganador si solo hay un jugador no en bancarrota
@@ -692,6 +705,7 @@ hayUnGanador(Jugadores, Ganador) :-
     excluirBancarrota(Jugadores, NoBancarrota),
     NoBancarrota = [Ganador], !.
 %Excluye jugadores en bancarrota con el fin de llegar al ganador
+%Recursion Natural
 excluirBancarrota([], []).
 excluirBancarrota([J|Resto], [J|Filtrados]) :-
     \+ jugadorEstaEnBancarrota(J),
